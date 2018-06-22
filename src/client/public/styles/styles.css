@@ -1,0 +1,14 @@
+.game__outer-wrapper {
+	border: 1px solid #ddd;
+	width: 600px;
+	height: 400px;
+	position: relative;
+}
+
+.game__player--wrap {
+	position: absolute;
+	height: 16px;
+	width: 16px;
+	/* Temporary */
+	background-color: #000;
+}
