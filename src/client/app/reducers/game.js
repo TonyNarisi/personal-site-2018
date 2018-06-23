@@ -49,13 +49,32 @@ const findNewPosY = (up, down, posY) => {
 	return newPosY;
 }
 
+const getNewBgMoveY = (action, bgMoveY) => {
+	const dirs = ['left', 'right', 'up', 'down'];
+	for (var dirNum = dirs.length, i = 0; i < dirNum; i++) {
+		if (action[dirs[i]]) {
+			var isOnly = true;
+			for (var j = 0; j < dirNum; j++) {
+				if (action[dirs[j]] && i != j) {
+					isOnly = false;
+				}
+			}
+		}
+		if (isOnly) {
+			return PC_BG_MOVE_Y_MAP[dirs[i]];
+		}
+	}
+	return bgMoveY;
+}
+
 const initialState = {
 	screenActive: false,
 	player: {
 		posX: PLAYER_CHAR_WIDTH,
 		posY: PLAYER_CHAR_HEIGHT,
 		bgMoveX: 0,
-		bgMoveY: 3,
+		bgMoveY: 2,
+		animLoop: 0,
 		health: 4,
 		upMovement: false,
 		downMovement: false,
@@ -89,15 +108,23 @@ const gameData = (state = initialState, action) => {
 				}
 			}
 		case MOVE_CHAR: 
-			var newBgMoveX;
-			if (action.left || action.right || action.up || action.down) {
-				newBgMoveX = state.player.bgMoveX + 1;
+			// REFACTOR THIS
+			var newBgMoveX, newAnimLoop;
+
+			newAnimLoop = state.player.animLoop + 1;
+			if (newAnimLoop > 1) {
+				newAnimLoop = 0;
+				if (action.left || action.right || action.up || action.down) {
+					newBgMoveX = state.player.bgMoveX + 1;
+				} else {
+					newBgMoveX = 0;
+				}
+
+				if (newBgMoveX > MAX_PC_BG_MOVE_X) {
+					newBgMoveX = 0;
+				}
 			} else {
 				newBgMoveX = state.player.bgMoveX;
-			}
-
-			if (newBgMoveX > MAX_PC_BG_MOVE_X) {
-				newBgMoveX = 0;
 			}
 
 			return {
@@ -106,7 +133,9 @@ const gameData = (state = initialState, action) => {
 					...state.player,
 					posX: findNewPosX(action.left, action.right, state.player.posX),
 					posY: findNewPosY(action.up, action.down, state.player.posY),
-					bgMoveX: newBgMoveX
+					bgMoveX: newBgMoveX,
+					bgMoveY: getNewBgMoveY(action, state.player.bgMoveY),
+					animLoop: newAnimLoop
 				}
 			}
 		default:
