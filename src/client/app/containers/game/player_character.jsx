@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { moveChar, registerKeyDown, registerKeyUp } from '../../actions/index.js';
-import { ARROW_KEYCODES, REFRESH_MS } from '../../constants.js'
+import { ARROW_KEYCODES, REFRESH_MS, PLAYER_CHAR_WIDTH, PLAYER_CHAR_HEIGHT } from '../../constants.js'
+import charWalkcycle from '../../../public/assets/game/walkcycles/BODY_skeleton.png';
 
 class PlayerCharacter extends Component {
 	componentWillMount() {
@@ -40,8 +41,13 @@ class PlayerCharacter extends Component {
 			<div
 				className="game__player--wrap"
 				style={{
-					left: `calc(50% - ${ props.posX - 8 }px)`,
-					top: `calc(50% - ${ props.posY - 8 }px)`
+					height: `${ PLAYER_CHAR_HEIGHT }px`,
+					width: `${ PLAYER_CHAR_WIDTH }px`,
+					left: `calc(50% - ${ props.posX - (PLAYER_CHAR_WIDTH/2) }px)`,
+					top: `calc(50% - ${ props.posY - (PLAYER_CHAR_HEIGHT/2) }px)`,
+					backgroundImage: `url(${ charWalkcycle })`,
+					backgroundPositionX: `${ props.bgMoveX * PLAYER_CHAR_WIDTH }px`,
+					backgroundPositionY: `${ props.bgMoveY * PLAYER_CHAR_HEIGHT }px`
 				}}>
 			</div>
 		)
@@ -53,6 +59,8 @@ const mapStateToProps = (state, ownProps) => {
 		screenActive: state.gameData.screenActive,
 		posX: state.gameData.player.posX,
 		posY: state.gameData.player.posY,
+		bgMoveX: state.gameData.player.bgMoveX,
+		bgMoveY: state.gameData.player.bgMoveY,
 		health: state.gameData.player.health,
 		movingUp: state.gameData.player.upMovement,
 		movingDown: state.gameData.player.downMovement,

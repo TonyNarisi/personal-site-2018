@@ -1,4 +1,12 @@
-import { MOVEMENT_RATE, GAME_SCREEN_HEIGHT, GAME_SCREEN_WIDTH, PLAYER_CHAR_HEIGHT, PLAYER_CHAR_WIDTH } from '../constants.js';
+import {
+	MOVEMENT_RATE,
+	GAME_SCREEN_HEIGHT,
+	GAME_SCREEN_WIDTH,
+	PLAYER_CHAR_HEIGHT,
+	PLAYER_CHAR_WIDTH,
+	MAX_PC_BG_MOVE_X,
+	PC_BG_MOVE_Y_MAP
+} from '../constants.js';
 import { MAKE_SCREEN_ACTIVE, MOVE_CHAR, REGISTER_KEY_DOWN, REGISTER_KEY_UP } from '../actions/game.js';
 
 const findNewPosX = (left, right, posX) => {
@@ -44,8 +52,10 @@ const findNewPosY = (up, down, posY) => {
 const initialState = {
 	screenActive: false,
 	player: {
-		posX: 0,
-		posY: 0,
+		posX: PLAYER_CHAR_WIDTH,
+		posY: PLAYER_CHAR_HEIGHT,
+		bgMoveX: 0,
+		bgMoveY: 3,
 		health: 4,
 		upMovement: false,
 		downMovement: false,
@@ -66,7 +76,8 @@ const gameData = (state = initialState, action) => {
 				...state,
 				player: {
 					...state.player,
-					[`${action.dir}Movement`]: true
+					[`${action.dir}Movement`]: true,
+					bgMoveY: PC_BG_MOVE_Y_MAP[action.dir]
 				}
 			}
 		case REGISTER_KEY_UP:
@@ -78,12 +89,24 @@ const gameData = (state = initialState, action) => {
 				}
 			}
 		case MOVE_CHAR: 
+			var newBgMoveX;
+			if (action.left || action.right || action.up || action.down) {
+				newBgMoveX = state.player.bgMoveX + 1;
+			} else {
+				newBgMoveX = state.player.bgMoveX;
+			}
+
+			if (newBgMoveX > MAX_PC_BG_MOVE_X) {
+				newBgMoveX = 0;
+			}
+
 			return {
 				...state,
 				player: {
 					...state.player,
 					posX: findNewPosX(action.left, action.right, state.player.posX),
-					posY: findNewPosY(action.up, action.down, state.player.posY)
+					posY: findNewPosY(action.up, action.down, state.player.posY),
+					bgMoveX: newBgMoveX
 				}
 			}
 		default:
