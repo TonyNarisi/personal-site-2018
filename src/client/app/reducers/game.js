@@ -1,5 +1,45 @@
-import { MOVEMENT_RATE } from '../constants.js';
+import { MOVEMENT_RATE, GAME_SCREEN_HEIGHT, GAME_SCREEN_WIDTH, PLAYER_CHAR_HEIGHT, PLAYER_CHAR_WIDTH } from '../constants.js';
 import { MAKE_SCREEN_ACTIVE, MOVE_CHAR, REGISTER_KEY_DOWN, REGISTER_KEY_UP } from '../actions/game.js';
+
+const findNewPosX = (left, right, posX) => {
+	var newPosX;
+
+	if (left && !right) {
+		newPosX = posX + MOVEMENT_RATE;
+	} else if (right && !left) {
+		newPosX = posX - MOVEMENT_RATE;
+	} else {
+		newPosX = posX;
+	}
+
+	if (newPosX < -((GAME_SCREEN_WIDTH/2) - (PLAYER_CHAR_WIDTH * 1.5)))  {
+		newPosX = -((GAME_SCREEN_WIDTH/2) - (PLAYER_CHAR_WIDTH * 1.5));
+	} else if (newPosX > ((GAME_SCREEN_WIDTH/2) + (PLAYER_CHAR_WIDTH/2))) {
+		newPosX = ((GAME_SCREEN_WIDTH/2) + (PLAYER_CHAR_WIDTH/2));
+	}
+
+	return newPosX;
+}
+
+const findNewPosY = (up, down, posY) => {
+	var newPosY;
+
+	if (up && !down) {
+		newPosY = posY + MOVEMENT_RATE;
+	} else if (down && !up) {
+		newPosY = posY - MOVEMENT_RATE;
+	} else {
+		newPosY = posY;
+	}
+
+	if (newPosY < -((GAME_SCREEN_HEIGHT/2) - (PLAYER_CHAR_HEIGHT * 1.5))) {
+		newPosY = -((GAME_SCREEN_HEIGHT/2) - (PLAYER_CHAR_HEIGHT * 1.5));
+	} else if (newPosY > ((GAME_SCREEN_HEIGHT/2) + (PLAYER_CHAR_HEIGHT/2))) {
+		newPosY = ((GAME_SCREEN_HEIGHT/2) + (PLAYER_CHAR_HEIGHT/2));
+	}
+
+	return newPosY;
+}
 
 const initialState = {
 	screenActive: false,
@@ -38,46 +78,12 @@ const gameData = (state = initialState, action) => {
 				}
 			}
 		case MOVE_CHAR: 
-			var newPosY, newPosX;
-			let posY = state.player.posY;
-			let posX = state.player.posX;
-
-			if (action.up && !action.down) {
-				newPosY = posY + MOVEMENT_RATE;
-			} else if (action.down && !action.up) {
-				newPosY = posY - MOVEMENT_RATE;
-			} else {
-				newPosY = posY;
-			}
-
-			// Make this calculation dynamic based on player size and game screen size
-			if (newPosY < -176) {
-				newPosY = -176;
-			} else if (newPosY > 208) {
-				newPosY = 208;
-			}
-
-			if (action.left && !action.right) {
-				newPosX = posX + MOVEMENT_RATE;
-			} else if (action.right && !action.left) {
-				newPosX = posX - MOVEMENT_RATE;
-			} else {
-				newPosX = posX;
-			}
-
-			// Make this calculation dynamic based on player size and game screen size
-			if (newPosX < -276) {
-				newPosX = -276;
-			} else if (newPosX > 308) {
-				newPosX = 308;
-			}
-
 			return {
 				...state,
 				player: {
 					...state.player,
-					posX: newPosX,
-					posY: newPosY
+					posX: findNewPosX(action.left, action.right, state.player.posX),
+					posY: findNewPosY(action.up, action.down, state.player.posY)
 				}
 			}
 		default:
