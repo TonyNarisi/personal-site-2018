@@ -50,12 +50,26 @@ const gameData = (state = initialState, action) => {
 				newPosY = posY;
 			}
 
+			// Make this calculation dynamic based on player size and game screen size
+			if (newPosY < -176) {
+				newPosY = -176;
+			} else if (newPosY > 208) {
+				newPosY = 208;
+			}
+
 			if (action.left && !action.right) {
 				newPosX = posX + MOVEMENT_RATE;
 			} else if (action.right && !action.left) {
 				newPosX = posX - MOVEMENT_RATE;
 			} else {
 				newPosX = posX;
+			}
+
+			// Make this calculation dynamic based on player size and game screen size
+			if (newPosX < -276) {
+				newPosX = -276;
+			} else if (newPosX > 308) {
+				newPosX = 308;
 			}
 
 			return {
