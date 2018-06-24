@@ -75,24 +75,24 @@ const getNewBgMoveY = (action, bgMoveY) => {
 	return bgMoveY;
 }
 
-const evalPlayerAgainstObs = (posX, posY, obs) => {
+const evalPlayerAgainstObs = (posX, posY, obs, dir, oldDir) => {
 	// needs major refactor
 	let top = GAME_SCREEN_HEIGHT/2 - posY + PLAYER_CHAR_HEIGHT/2;
 	let bottom = GAME_SCREEN_HEIGHT/2 - posY + PLAYER_CHAR_HEIGHT/2 + PLAYER_CHAR_HEIGHT;
-	let right = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2 + PLAYER_CHAR_WIDTH;
-	let left = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2;
+	let right = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2 + PLAYER_CHAR_WIDTH - PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2;
+	let left = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2 + PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2;
 	var isInsideX = false;
 	var isInsideY = false;
 	let xRange = [obs.left, obs.left + obs.width];
 	let yRange = [obs.top, obs.top + obs.height];
 
-	if (left > xRange[0] && left < xRange[1] || right > xRange[0] && left < xRange[1]) {
+	if (left > xRange[0] && left < xRange[1] || right > xRange[0] && right < xRange[1]) {
 		isInsideX = true;
 	}
 	if (
-		(xRange[0] > left && xRange[1] < right) ||
-		(xRange[0] < left && xRange[1] > right) ||
-		(xRange[0] < left && xRange[1] > right)
+		(xRange[0] >= left && xRange[1] <= right) ||
+		(xRange[0] <= left && xRange[1] >= right) ||
+		(xRange[0] <= left && xRange[1] >= right)
 	) {
 		isInsideX = true;
 	}
@@ -101,9 +101,9 @@ const evalPlayerAgainstObs = (posX, posY, obs) => {
 		isInsideY = true;
 	}
 	if (
-		(yRange[0] > top && yRange[1] < bottom) ||
-		(yRange[0] < top && yRange[0] > bottom) ||
-		(yRange[1] < top && yRange[1] > bottom)
+		(yRange[0] >= top && yRange[1] <= bottom) ||
+		(yRange[0] <= top && yRange[0] >= bottom) ||
+		(yRange[1] <= top && yRange[1] >= bottom)
 	) {
 		isInsideY = true;
 	}
@@ -111,23 +111,45 @@ const evalPlayerAgainstObs = (posX, posY, obs) => {
 	return isInsideX && isInsideY;
 }
 
-const evalObstacles = (oldPosX, oldPosY, posX, posY, obstacles) => {
+const evalPlayerHorObs = (posX, obs, dir) => {
+	let right = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2 + PLAYER_CHAR_WIDTH;
+	let left = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2;
+	let xRange = [obs.left, obs.left + obs.width];
+	let yRange = [obs.top, obs.top + obs.height];
+	return (
+		(right > xRange[0] && right < xRange[1])
+	)
+}
+
+const evalObstacles = (oldPosX, oldPosY, posX, posY, obstacles, dir, oldDir) => {
 	// needs major refactor
 	var correctedX = posX;
 	var correctedY = posY;
 	for (var obstacleNum = obstacles.length, i = 0; i < obstacleNum; i++) {
-		var isInside = evalPlayerAgainstObs(posX, posY, obstacles[i]);
+		var noMoveY = false;
+		var noMoveX = false;
+		var isInside = evalPlayerAgainstObs(posX, posY, obstacles[i], dir);
 
 		if (isInside) {
-			var noMoveY = evalPlayerAgainstObs(oldPosX, posY, obstacles[i]);
-			var noMoveX = evalPlayerAgainstObs(posX, oldPosY, obstacles[i]);
+			var noMoveY = evalPlayerAgainstObs(oldPosX, posY, obstacles[i], dir);
+			var noMoveX = evalPlayerAgainstObs(posX, oldPosY, obstacles[i], dir);
 		}
 
 		if (noMoveY) {
 			correctedY = oldPosY;
 		}	
 		if (noMoveX) {
-			correctedX = oldPosX;
+			if (dir === 'vertical' && oldDir === 'horizontal') {
+				// only works for left side, need to determine if user is pressing against left or right side
+				var isOnLeft = evalPlayerHorObs(oldPosX, obstacles[i], dir);
+				if (isOnLeft) {
+					correctedX = oldPosX + 4;
+				} else {
+					correctedX = oldPosX - 4;
+				}
+			} else {
+				correctedX = oldPosX;
+			}
 		}
 	}
 	return [correctedX, correctedY];
@@ -208,6 +230,7 @@ const gameData = (state = initialState, action) => {
 				newBgMoveX = state.player.bgMoveX;
 			}
 
+			var oldDir = state.player.dir;
 			var newBgMoveY = getNewBgMoveY(action, state.player.bgMoveY);
 			// rewrite to be based on map in constants.js
 			if (newBgMoveY === 0 || newBgMoveY === 2) {
@@ -216,9 +239,9 @@ const gameData = (state = initialState, action) => {
 				newDir = 'horizontal';
 			}
 
-			var newPosX = findNewPosX(action.left, action.right, state.player.posX, state.player.dir);
+			var newPosX = findNewPosX(action.left, action.right, state.player.posX, newDir);
 			var newPosY = findNewPosY(action.up, action.down, state.player.posY);
-			var newCoords = evalObstacles(oldPosX, oldPosY, newPosX, newPosY, state.obstacles);
+			var newCoords = evalObstacles(oldPosX, oldPosY, newPosX, newPosY, state.obstacles, newDir, oldDir);
 			newPosX = newCoords[0];
 			newPosY = newCoords[1];
 
