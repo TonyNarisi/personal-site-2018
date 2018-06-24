@@ -1,7 +1,16 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { moveChar, registerKeyDown, registerKeyUp } from '../../actions/index.js';
-import { ARROW_KEYCODES, REFRESH_MS, PLAYER_CHAR_WIDTH, PLAYER_CHAR_HEIGHT } from '../../constants.js'
+import {
+	ARROW_KEYCODES,
+	REFRESH_MS,
+	PLAYER_CHAR_WIDTH,
+	PLAYER_CHAR_HEIGHT,
+	PLAYER_CHAR_X_OFFSET,
+	PLAYER_CHAR_Y_OFFSET,
+	PLAYER_CHAR_SPRITE_HEIGHT,
+	PLAYER_CHAR_SPRITE_WIDTH
+} from '../../constants.js'
 import charWalkcycle from '../../../public/assets/game/walkcycles/BODY_skeleton.png';
 
 class PlayerCharacter extends Component {
@@ -39,6 +48,7 @@ class PlayerCharacter extends Component {
 		let props = this.props;
 		return(
 			<div
+				id="player-avatar"
 				className="game__player--wrap"
 				style={{
 					height: `${ PLAYER_CHAR_HEIGHT }px`,
@@ -46,8 +56,8 @@ class PlayerCharacter extends Component {
 					left: `calc(50% - ${ props.posX - (PLAYER_CHAR_WIDTH/2) }px)`,
 					top: `calc(50% - ${ props.posY - (PLAYER_CHAR_HEIGHT/2) }px)`,
 					backgroundImage: `url(${ charWalkcycle })`,
-					backgroundPositionX: `${ props.bgMoveX * PLAYER_CHAR_WIDTH }px`,
-					backgroundPositionY: `${ props.bgMoveY * PLAYER_CHAR_HEIGHT }px`
+					backgroundPositionX: `${ (props.bgMoveX * PLAYER_CHAR_SPRITE_WIDTH) - PLAYER_CHAR_X_OFFSET }px`,
+					backgroundPositionY: `${ (props.bgMoveY * PLAYER_CHAR_SPRITE_HEIGHT) - PLAYER_CHAR_Y_OFFSET }px`
 				}}>
 			</div>
 		)
@@ -57,6 +67,7 @@ class PlayerCharacter extends Component {
 const mapStateToProps = (state, ownProps) => {
 	return {
 		screenActive: state.gameData.screenActive,
+		dir: state.gameData.player.dir,
 		posX: state.gameData.player.posX,
 		posY: state.gameData.player.posY,
 		bgMoveX: state.gameData.player.bgMoveX,

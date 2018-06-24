@@ -1,8 +1,9 @@
-import { makeScreenActive, moveChar, registerKeyDown, registerKeyUp } from './game.js';
+import { makeScreenActive, moveChar, registerKeyDown, registerKeyUp, createObstacle } from './game.js';
 
 export {
 	makeScreenActive,
 	moveChar,
 	registerKeyDown,
-	registerKeyUp
+	registerKeyUp,
+	createObstacle
 }
