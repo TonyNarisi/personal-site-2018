@@ -4,12 +4,14 @@ import {
 	GAME_SCREEN_WIDTH,
 	PLAYER_CHAR_HEIGHT,
 	PLAYER_CHAR_WIDTH,
+	PLAYER_CHAR_INNER_HITBOX_VERT,
+	PLAYER_CHAR_INNER_HITBOX_HOR,
 	MAX_PC_BG_MOVE_X,
 	PC_BG_MOVE_Y_MAP
 } from '../constants.js';
 import { MAKE_SCREEN_ACTIVE, MOVE_CHAR, REGISTER_KEY_DOWN, REGISTER_KEY_UP } from '../actions/game.js';
 
-const findNewPosX = (left, right, posX) => {
+const findNewPosX = (left, right, posX, dir) => {
 	var newPosX;
 
 	if (left && !right) {
@@ -20,10 +22,10 @@ const findNewPosX = (left, right, posX) => {
 		newPosX = posX;
 	}
 
-	if (newPosX < -((GAME_SCREEN_WIDTH/2) - (PLAYER_CHAR_WIDTH * 1.5)))  {
-		newPosX = -((GAME_SCREEN_WIDTH/2) - (PLAYER_CHAR_WIDTH * 1.5));
-	} else if (newPosX > ((GAME_SCREEN_WIDTH/2) + (PLAYER_CHAR_WIDTH/2))) {
-		newPosX = ((GAME_SCREEN_WIDTH/2) + (PLAYER_CHAR_WIDTH/2));
+	if (newPosX < -((GAME_SCREEN_WIDTH/2) - ((PLAYER_CHAR_WIDTH * 1.5) - PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2)))  {
+		newPosX = -((GAME_SCREEN_WIDTH/2) - ((PLAYER_CHAR_WIDTH * 1.5) - PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2));
+	} else if (newPosX > ((GAME_SCREEN_WIDTH/2) + (PLAYER_CHAR_WIDTH/2) + PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2)) {
+		newPosX = ((GAME_SCREEN_WIDTH/2) + (PLAYER_CHAR_WIDTH/2) + PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2);
 	}
 
 	return newPosX;
@@ -72,6 +74,7 @@ const initialState = {
 	player: {
 		posX: PLAYER_CHAR_WIDTH,
 		posY: PLAYER_CHAR_HEIGHT,
+		dir: 'vertical',
 		bgMoveX: 0,
 		bgMoveY: 2,
 		animLoop: 0,
@@ -109,7 +112,7 @@ const gameData = (state = initialState, action) => {
 			}
 		case MOVE_CHAR: 
 			// REFACTOR THIS
-			var newBgMoveX, newAnimLoop;
+			var newBgMoveX, newAnimLoop, newDir;
 
 			newAnimLoop = state.player.animLoop + 1;
 			if (newAnimLoop > 1) {
@@ -127,12 +130,21 @@ const gameData = (state = initialState, action) => {
 				newBgMoveX = state.player.bgMoveX;
 			}
 
+			var newBgMoveY = getNewBgMoveY(action, state.player.bgMoveY);
+			// rewrite to be based on map in constants.js
+			if (newBgMoveY === 0 || newBgMoveY === 2) {
+				newDir = 'vertical';
+			} else {
+				newDir = 'horizontal';
+			}
+
 			return {
 				...state,
 				player: {
 					...state.player,
-					posX: findNewPosX(action.left, action.right, state.player.posX),
+					posX: findNewPosX(action.left, action.right, state.player.posX, state.player.dir),
 					posY: findNewPosY(action.up, action.down, state.player.posY),
+					dir: newDir,
 					bgMoveX: newBgMoveX,
 					bgMoveY: getNewBgMoveY(action, state.player.bgMoveY),
 					animLoop: newAnimLoop
