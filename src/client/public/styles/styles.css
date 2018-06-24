@@ -8,3 +8,7 @@
 .game__player--wrap {
 	position: absolute;
 }
+
+.game__obstacle {
+	position: absolute;
+}

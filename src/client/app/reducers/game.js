@@ -9,7 +9,13 @@ import {
 	MAX_PC_BG_MOVE_X,
 	PC_BG_MOVE_Y_MAP
 } from '../constants.js';
-import { MAKE_SCREEN_ACTIVE, MOVE_CHAR, REGISTER_KEY_DOWN, REGISTER_KEY_UP } from '../actions/game.js';
+import {
+	MAKE_SCREEN_ACTIVE,
+	MOVE_CHAR,
+	REGISTER_KEY_DOWN,
+	REGISTER_KEY_UP,
+	CREATE_OBSTACLE
+} from '../actions/game.js';
 
 const findNewPosX = (left, right, posX, dir) => {
 	var newPosX;
@@ -69,8 +75,67 @@ const getNewBgMoveY = (action, bgMoveY) => {
 	return bgMoveY;
 }
 
+const evalPlayerAgainstObs = (posX, posY, obs) => {
+	// needs major refactor
+	let top = GAME_SCREEN_HEIGHT/2 - posY + PLAYER_CHAR_HEIGHT/2;
+	let bottom = GAME_SCREEN_HEIGHT/2 - posY + PLAYER_CHAR_HEIGHT/2 + PLAYER_CHAR_HEIGHT;
+	let right = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2 + PLAYER_CHAR_WIDTH;
+	let left = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2;
+	var isInsideX = false;
+	var isInsideY = false;
+	let xRange = [obs.left, obs.left + obs.width];
+	let yRange = [obs.top, obs.top + obs.height];
+
+	if (left > xRange[0] && left < xRange[1] || right > xRange[0] && left < xRange[1]) {
+		isInsideX = true;
+	}
+	if (
+		(xRange[0] > left && xRange[1] < right) ||
+		(xRange[0] < left && xRange[1] > right) ||
+		(xRange[0] < left && xRange[1] > right)
+	) {
+		isInsideX = true;
+	}
+
+	if (top > yRange[0] && top < yRange[1] || bottom > yRange[0] && bottom < yRange[1]) {
+		isInsideY = true;
+	}
+	if (
+		(yRange[0] > top && yRange[1] < bottom) ||
+		(yRange[0] < top && yRange[0] > bottom) ||
+		(yRange[1] < top && yRange[1] > bottom)
+	) {
+		isInsideY = true;
+	}
+
+	return isInsideX && isInsideY;
+}
+
+const evalObstacles = (oldPosX, oldPosY, posX, posY, obstacles) => {
+	// needs major refactor
+	var correctedX = posX;
+	var correctedY = posY;
+	for (var obstacleNum = obstacles.length, i = 0; i < obstacleNum; i++) {
+		var isInside = evalPlayerAgainstObs(posX, posY, obstacles[i]);
+
+		if (isInside) {
+			var noMoveY = evalPlayerAgainstObs(oldPosX, posY, obstacles[i]);
+			var noMoveX = evalPlayerAgainstObs(posX, oldPosY, obstacles[i]);
+		}
+
+		if (noMoveY) {
+			correctedY = oldPosY;
+		}	
+		if (noMoveX) {
+			correctedX = oldPosX;
+		}
+	}
+	return [correctedX, correctedY];
+}
+
 const initialState = {
 	screenActive: false,
+	obstacles: [],
 	player: {
 		posX: PLAYER_CHAR_WIDTH,
 		posY: PLAYER_CHAR_HEIGHT,
@@ -88,6 +153,17 @@ const initialState = {
 
 const gameData = (state = initialState, action) => {
 	switch (action.type) {
+		case CREATE_OBSTACLE:
+			return {
+				...state,
+				obstacles: state.obstacles.concat([{
+					'key': action.key,
+					'left': action.left,
+					'top': action.top,
+					'width': action.width,
+					'height': action.height
+				}])
+			}
 		case MAKE_SCREEN_ACTIVE:
 			return {
 				...state,
@@ -113,6 +189,8 @@ const gameData = (state = initialState, action) => {
 		case MOVE_CHAR: 
 			// REFACTOR THIS
 			var newBgMoveX, newAnimLoop, newDir;
+			var oldPosX = state.player.posX;
+			var oldPosY = state.player.posY;
 
 			newAnimLoop = state.player.animLoop + 1;
 			if (newAnimLoop > 1) {
@@ -138,12 +216,18 @@ const gameData = (state = initialState, action) => {
 				newDir = 'horizontal';
 			}
 
+			var newPosX = findNewPosX(action.left, action.right, state.player.posX, state.player.dir);
+			var newPosY = findNewPosY(action.up, action.down, state.player.posY);
+			var newCoords = evalObstacles(oldPosX, oldPosY, newPosX, newPosY, state.obstacles);
+			newPosX = newCoords[0];
+			newPosY = newCoords[1];
+
 			return {
 				...state,
 				player: {
 					...state.player,
-					posX: findNewPosX(action.left, action.right, state.player.posX, state.player.dir),
-					posY: findNewPosY(action.up, action.down, state.player.posY),
+					posX: newPosX,
+					posY: newPosY,
 					dir: newDir,
 					bgMoveX: newBgMoveX,
 					bgMoveY: getNewBgMoveY(action, state.player.bgMoveY),

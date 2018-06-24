@@ -48,6 +48,7 @@ class PlayerCharacter extends Component {
 		let props = this.props;
 		return(
 			<div
+				id="player-avatar"
 				className="game__player--wrap"
 				style={{
 					height: `${ PLAYER_CHAR_HEIGHT }px`,
