@@ -1,20 +1,24 @@
 import {
-	MOVEMENT_RATE,
 	GAME_SCREEN_HEIGHT,
-	GAME_SCREEN_WIDTH,
+	GAME_SCREEN_WIDTH
+} from '../constants/game.js'
+import {
+	MOVEMENT_RATE,
 	PLAYER_CHAR_HEIGHT,
 	PLAYER_CHAR_WIDTH,
 	PLAYER_CHAR_INNER_HITBOX_VERT,
 	PLAYER_CHAR_INNER_HITBOX_HOR,
 	MAX_PC_BG_MOVE_X,
 	PC_BG_MOVE_Y_MAP
-} from '../constants.js';
+} from '../constants/player.js';
 import {
 	MAKE_SCREEN_ACTIVE,
 	MOVE_CHAR,
 	REGISTER_KEY_DOWN,
 	REGISTER_KEY_UP,
-	CREATE_OBSTACLE
+	CREATE_OBSTACLE,
+	SET_NEW_ENEMY_POS,
+	CHANGE_ENEMY_DIR
 } from '../actions/game.js';
 
 const findNewPosX = (left, right, posX, dir) => {
@@ -170,7 +174,26 @@ const initialState = {
 		downMovement: false,
 		leftMovement: false,
 		rightMovement: false
-	}
+	},
+	// change to be dynamic
+	enemies: [
+		{
+			type: 'archer',
+			id: 'archer8543',
+			posX: -100,
+			posY: -100,
+			dir: 'up',
+			health: 2
+		},
+		{
+			type: 'archer',
+			id: 'archer8544',
+			posX: -60,
+			posY: -60,
+			dir: 'left',
+			health: 2
+		}
+	]
 };
 
 const gameData = (state = initialState, action) => {
@@ -256,6 +279,39 @@ const gameData = (state = initialState, action) => {
 					bgMoveY: getNewBgMoveY(action, state.player.bgMoveY),
 					animLoop: newAnimLoop
 				}
+			}
+		case SET_NEW_ENEMY_POS:
+			var newEnemies = state.enemies.map(enemy => {
+				return (
+					enemy.id === action.id ?
+							{
+								...enemy,
+								posX: action.posX,
+								posY: action.posY
+							}
+						:
+							enemy
+				)
+			})
+			return {
+				...state,
+				enemies: newEnemies
+			}
+		case CHANGE_ENEMY_DIR:
+			var newEnemies = state.enemies.map(enemy => {
+				return (
+					enemy.id === action.id ?
+							{
+								...enemy,
+								dir: action.dir
+							}
+						:
+							enemy
+				)
+			})
+			return {
+				...state,
+				enemies: newEnemies
 			}
 		default:
 			return state;

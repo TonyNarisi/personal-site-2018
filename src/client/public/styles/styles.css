@@ -5,10 +5,8 @@
 	position: relative;
 }
 
-.game__player--wrap {
-	position: absolute;
-}
-
+.game__player--wrap,
+.game__enemy,
 .game__obstacle {
 	position: absolute;
 }
