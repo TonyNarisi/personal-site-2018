@@ -5,6 +5,8 @@ export const MOVE_CHAR = 'MOVE_CHAR';
 export const REGISTER_KEY_DOWN = 'REGISTER_KEY_DOWN';
 export const REGISTER_KEY_UP = 'REGISTER_KEY_UP';
 export const CREATE_OBSTACLE = 'CREATE_OBSTACLE';
+export const SET_NEW_ENEMY_POS = 'SET_NEW_ENEMY_POS';
+export const CHANGE_ENEMY_DIR = 'CHANGE_ENEMY_DIR';
 
 const determineDir = (code) => {
 	if (code === 37) {
@@ -44,4 +46,12 @@ export function registerKeyUp(e) {
 	let code = e.keyCode;
 	let dir = determineDir(code);
 	return { type: REGISTER_KEY_UP, dir };
+}
+
+export function setNewEnemyPos(id, posX, posY) {
+	return { type: SET_NEW_ENEMY_POS, id, posX, posY };
+}
+
+export function changeEnemyDir(id, dir) {
+	return { type: CHANGE_ENEMY_DIR, id, dir };
 }
