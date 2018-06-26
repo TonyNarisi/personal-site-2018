@@ -1,4 +1,4 @@
-import { GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT } from '../constants.js';
+import { GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT } from '../constants/game.js';
 
 export const MAKE_SCREEN_ACTIVE = 'MAKE_SCREEN_ACTIVE';
 export const MOVE_CHAR = 'MOVE_CHAR';

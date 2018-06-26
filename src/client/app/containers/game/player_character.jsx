@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { moveChar, registerKeyDown, registerKeyUp } from '../../actions/index.js';
+import { REFRESH_MS } from '../../constants/game.js';
 import {
 	ARROW_KEYCODES,
-	REFRESH_MS,
 	PLAYER_CHAR_WIDTH,
 	PLAYER_CHAR_HEIGHT,
 	PLAYER_CHAR_X_OFFSET,
 	PLAYER_CHAR_Y_OFFSET,
 	PLAYER_CHAR_SPRITE_HEIGHT,
 	PLAYER_CHAR_SPRITE_WIDTH
-} from '../../constants.js'
+} from '../../constants/player.js'
 import charWalkcycle from '../../../public/assets/game/walkcycles/BODY_skeleton.png';
 
 class PlayerCharacter extends Component {

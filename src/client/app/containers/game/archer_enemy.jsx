@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { setNewEnemyPos, changeEnemyDir } from '../../actions/index.js';
-import { REFRESH_MS } from '../../constants.js';
+import { REFRESH_MS } from '../../constants/game.js';
 import { ARCHER_ENEMY } from '../../constants/enemies.js';
 
 class ArcherEnemy extends Component {
@@ -101,6 +101,7 @@ class ArcherEnemy extends Component {
 const mapStateToProps = (state, ownProps) => {
 	return {
 		screenActive: state.gameData.screenActive,
+		obstacles: state.gameData.obstacles,
 		posX: ownProps.posX,
 		posY: ownProps.posY,
 		id: ownProps.id,

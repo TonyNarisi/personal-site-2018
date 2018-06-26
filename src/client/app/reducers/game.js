@@ -1,14 +1,16 @@
 import {
-	MOVEMENT_RATE,
 	GAME_SCREEN_HEIGHT,
-	GAME_SCREEN_WIDTH,
+	GAME_SCREEN_WIDTH
+} from '../constants/game.js'
+import {
+	MOVEMENT_RATE,
 	PLAYER_CHAR_HEIGHT,
 	PLAYER_CHAR_WIDTH,
 	PLAYER_CHAR_INNER_HITBOX_VERT,
 	PLAYER_CHAR_INNER_HITBOX_HOR,
 	MAX_PC_BG_MOVE_X,
 	PC_BG_MOVE_Y_MAP
-} from '../constants.js';
+} from '../constants/player.js';
 import {
 	MAKE_SCREEN_ACTIVE,
 	MOVE_CHAR,
@@ -180,14 +182,16 @@ const initialState = {
 			id: 'archer8543',
 			posX: -100,
 			posY: -100,
-			dir: 'up'
+			dir: 'up',
+			health: 2
 		},
 		{
 			type: 'archer',
 			id: 'archer8544',
 			posX: -60,
 			posY: -60,
-			dir: 'left'
+			dir: 'left',
+			health: 2
 		}
 	]
 };
