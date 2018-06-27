@@ -17,7 +17,6 @@ class PlayerCharacter extends Component {
 	componentWillMount() {
 		document.addEventListener('keydown', (e) => {
 			let props = this.props;
-			console.log(e);
 			if (props.screenActive && this.isArrow(e.keyCode)) {
 				props.registerKeyDown(e);
 			}
@@ -53,8 +52,8 @@ class PlayerCharacter extends Component {
 				style={{
 					height: `${ PLAYER_CHAR_HEIGHT }px`,
 					width: `${ PLAYER_CHAR_WIDTH }px`,
-					left: `calc(50% - ${ props.posX - (PLAYER_CHAR_WIDTH/2) }px)`,
-					top: `calc(50% - ${ props.posY - (PLAYER_CHAR_HEIGHT/2) }px)`,
+					left: `${ props.posX }px`,
+					top: `${ props.posY }px`,
 					backgroundImage: `url(${ charWalkcycle })`,
 					backgroundPositionX: `${ (props.bgMoveX * PLAYER_CHAR_SPRITE_WIDTH) - PLAYER_CHAR_X_OFFSET }px`,
 					backgroundPositionY: `${ (props.bgMoveY * PLAYER_CHAR_SPRITE_HEIGHT) - PLAYER_CHAR_Y_OFFSET }px`

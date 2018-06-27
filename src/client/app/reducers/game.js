@@ -25,17 +25,17 @@ const findNewPosX = (left, right, posX, dir) => {
 	var newPosX;
 
 	if (left && !right) {
-		newPosX = posX + MOVEMENT_RATE;
-	} else if (right && !left) {
 		newPosX = posX - MOVEMENT_RATE;
+	} else if (right && !left) {
+		newPosX = posX + MOVEMENT_RATE;
 	} else {
 		newPosX = posX;
 	}
 
-	if (newPosX < -((GAME_SCREEN_WIDTH/2) - ((PLAYER_CHAR_WIDTH * 1.5) - PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2)))  {
-		newPosX = -((GAME_SCREEN_WIDTH/2) - ((PLAYER_CHAR_WIDTH * 1.5) - PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2));
-	} else if (newPosX > ((GAME_SCREEN_WIDTH/2) + (PLAYER_CHAR_WIDTH/2) + PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2)) {
-		newPosX = ((GAME_SCREEN_WIDTH/2) + (PLAYER_CHAR_WIDTH/2) + PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2);
+	if (newPosX < -(PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2))  {
+		newPosX = -(PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2);
+	} else if (newPosX > (GAME_SCREEN_WIDTH - PLAYER_CHAR_WIDTH + (PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2))) {
+		newPosX = (GAME_SCREEN_WIDTH - PLAYER_CHAR_WIDTH + PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2);
 	}
 
 	return newPosX;
@@ -45,17 +45,17 @@ const findNewPosY = (up, down, posY) => {
 	var newPosY;
 
 	if (up && !down) {
-		newPosY = posY + MOVEMENT_RATE;
-	} else if (down && !up) {
 		newPosY = posY - MOVEMENT_RATE;
+	} else if (down && !up) {
+		newPosY = posY + MOVEMENT_RATE;
 	} else {
 		newPosY = posY;
 	}
 
-	if (newPosY < -((GAME_SCREEN_HEIGHT/2) - (PLAYER_CHAR_HEIGHT * 1.5))) {
-		newPosY = -((GAME_SCREEN_HEIGHT/2) - (PLAYER_CHAR_HEIGHT * 1.5));
-	} else if (newPosY > ((GAME_SCREEN_HEIGHT/2) + (PLAYER_CHAR_HEIGHT/2))) {
-		newPosY = ((GAME_SCREEN_HEIGHT/2) + (PLAYER_CHAR_HEIGHT/2));
+	if (newPosY < 0) {
+		newPosY = 0;
+	} else if (newPosY > (GAME_SCREEN_HEIGHT - PLAYER_CHAR_HEIGHT)) {
+		newPosY = GAME_SCREEN_HEIGHT - PLAYER_CHAR_HEIGHT;
 	}
 
 	return newPosY;
@@ -81,10 +81,10 @@ const getNewBgMoveY = (action, bgMoveY) => {
 
 const evalPlayerAgainstObs = (posX, posY, obs, dir, oldDir) => {
 	// needs major refactor
-	let top = GAME_SCREEN_HEIGHT/2 - posY + PLAYER_CHAR_HEIGHT/2;
-	let bottom = GAME_SCREEN_HEIGHT/2 - posY + PLAYER_CHAR_HEIGHT/2 + PLAYER_CHAR_HEIGHT;
-	let right = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2 + PLAYER_CHAR_WIDTH - PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2;
-	let left = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2 + PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2;
+	let top = posY;
+	let bottom = posY + PLAYER_CHAR_HEIGHT;
+	let right = posX + PLAYER_CHAR_WIDTH - PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2;
+	let left = posX + (PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2);
 	var isInsideX = false;
 	var isInsideY = false;
 	let xRange = [obs.left, obs.left + obs.width];
@@ -116,8 +116,7 @@ const evalPlayerAgainstObs = (posX, posY, obs, dir, oldDir) => {
 }
 
 const evalPlayerHorObs = (posX, obs, dir) => {
-	let right = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2 + PLAYER_CHAR_WIDTH;
-	let left = GAME_SCREEN_WIDTH/2 - posX + PLAYER_CHAR_WIDTH/2;
+	let right = posX + PLAYER_CHAR_WIDTH - (PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2);
 	let xRange = [obs.left, obs.left + obs.width];
 	let yRange = [obs.top, obs.top + obs.height];
 	return (
@@ -147,9 +146,9 @@ const evalObstacles = (oldPosX, oldPosY, posX, posY, obstacles, dir, oldDir) => 
 				// only works for left side, need to determine if user is pressing against left or right side
 				var isOnLeft = evalPlayerHorObs(oldPosX, obstacles[i], dir);
 				if (isOnLeft) {
-					correctedX = oldPosX + 4;
-				} else {
 					correctedX = oldPosX - 4;
+				} else {
+					correctedX = oldPosX + 4;
 				}
 			} else {
 				correctedX = oldPosX;
@@ -163,8 +162,8 @@ const initialState = {
 	screenActive: false,
 	obstacles: [],
 	player: {
-		posX: PLAYER_CHAR_WIDTH,
-		posY: PLAYER_CHAR_HEIGHT,
+		posX: GAME_SCREEN_WIDTH/2 - PLAYER_CHAR_WIDTH/2,
+		posY: GAME_SCREEN_HEIGHT/2 - PLAYER_CHAR_HEIGHT/2,
 		dir: 'vertical',
 		bgMoveX: 0,
 		bgMoveY: 2,
