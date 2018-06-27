@@ -12,6 +12,11 @@ import {
 	PC_BG_MOVE_Y_MAP
 } from '../constants/player.js';
 import {
+	POTENTIAL_DIRS,
+	ARCHER_ENEMY
+} from '../constants/enemies.js';
+const enemyArr = [ARCHER_ENEMY];
+import {
 	MAKE_SCREEN_ACTIVE,
 	REFRESH_SCREEN,
 	REGISTER_KEY_DOWN,
@@ -225,6 +230,76 @@ const moveChar = (player, action, obstacles) => {
 	}
 }
 
+const getEnemyNewX = (dir, posX, enemyArr) => {
+	var newPosX = posX;
+
+	if (dir === 'left') {
+		newPosX = posX + enemyArr.MOVE_RATE;
+	} else if (dir === 'right') {
+		newPosX = posX - enemyArr.MOVE_RATE;
+	}
+
+	if (newPosX < 0) {
+		newPosX = 0;
+	} else if (newPosX > GAME_SCREEN_WIDTH - enemyArr.WIDTH) {
+		newPosX = GAME_SCREEN_WIDTH - enemyArr.WIDTH;
+	}
+
+	return newPosX;
+}
+
+const getEnemyNewY = (dir, posY, enemyConst) => {
+	var newPosY = posY;
+
+	if (dir === 'up') {
+		newPosY = posY + enemyConst.MOVE_RATE;
+	} else if (dir === 'down') {
+		newPosY = posY - enemyConst.MOVE_RATE;
+	}
+
+	if (newPosY < 0) {
+		newPosY = 0;
+	} else if (newPosY > GAME_SCREEN_HEIGHT - enemyConst.HEIGHT) {
+		newPosY = GAME_SCREEN_HEIGHT - enemyConst.HEIGHT;
+	}
+
+	return newPosY;
+}
+
+const getNewDirLoop = (dirLoop, enemyConst) => {
+	var newDirLoop = dirLoop + 1;
+	if (newDirLoop > enemyConst.DIR_LOOP_MAX) {
+		newDirLoop = 0;
+	}
+	return newDirLoop;
+}
+
+const getNewDir = () => {
+	let idx = Math.floor(Math.random() * POTENTIAL_DIRS.length);
+	return POTENTIAL_DIRS[idx];
+}
+
+const moveEnemy = enemy => {
+	let enemyConst = enemyArr.filter(proto => {
+		return proto.type === enemy.type;
+	})[0];
+	var newX = getEnemyNewX(enemy.dir, enemy.posX, enemyConst);
+	var newY = getEnemyNewY(enemy.dir, enemy.posY, enemyConst);
+	var newDirLoop = getNewDirLoop(enemy.dirLoop, enemyConst)
+	if (newDirLoop === 0) {
+		var newDir = getNewDir();
+	} else {
+		var newDir = enemy.dir;
+	}
+	return {
+		...enemy,
+		posX: newX,
+		posY: newY,
+		dirLoop: newDirLoop,
+		dir: newDir
+	}
+}
+
 const initialState = {
 	screenActive: false,
 	obstacles: [],
@@ -248,6 +323,7 @@ const initialState = {
 			id: 'archer8543',
 			posX: 200,
 			posY: 200,
+			dirLoop: 0,
 			dir: 'up',
 			health: 2
 		},
@@ -256,6 +332,7 @@ const initialState = {
 			id: 'archer8544',
 			posX: 300,
 			posY: 300,
+			dirLoop: 0,
 			dir: 'left',
 			health: 2
 		}
@@ -299,13 +376,17 @@ const gameData = (state = initialState, action) => {
 			}
 		case REFRESH_SCREEN:
 			var proposedCharMove = moveChar(state.player, action, state.obstacles);
+			var proposedEnemyMoves = state.enemies.map(enemy => {
+				return moveEnemy(enemy);
+			})
 
 			return {
 				...state,
 				player: {
 					...state.player,
 					...proposedCharMove
-				}
+				},
+				enemies: proposedEnemyMoves
 			}
 		case SET_NEW_ENEMY_POS:
 			var newEnemies = state.enemies.map(enemy => {
