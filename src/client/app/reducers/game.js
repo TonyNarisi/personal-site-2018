@@ -13,7 +13,7 @@ import {
 } from '../constants/player.js';
 import {
 	MAKE_SCREEN_ACTIVE,
-	MOVE_CHAR,
+	REFRESH_SCREEN,
 	REGISTER_KEY_DOWN,
 	REGISTER_KEY_UP,
 	CREATE_OBSTACLE,
@@ -158,6 +158,73 @@ const evalObstacles = (oldPosX, oldPosY, posX, posY, obstacles, dir, oldDir) => 
 	return [correctedX, correctedY];
 }
 
+const getNewAnimLoop = animLoop => {
+	var newAnimLoop = animLoop + 1;
+	if (newAnimLoop > 1) {
+		newAnimLoop = 0;
+	}
+	return newAnimLoop;
+}
+
+const getNewBgMoveX = (shouldChange, bgMoveX, max, isMoving) => {
+	var newBgMoveX;
+	if (isMoving) {
+		newBgMoveX = bgMoveX + 1;
+	} else {
+		newBgMoveX = 0;
+	}
+
+	if (newBgMoveX > max) {
+		newBgMoveX = 0;
+	}
+
+	if (!shouldChange) {
+		newBgMoveX = bgMoveX;
+	}
+
+	return newBgMoveX;
+}
+
+const moveChar = (player, action, obstacles) => {
+	var newDir;
+	var oldPosX = player.posX;
+	var oldPosY = player.posY;
+	var oldDir = player.dir;
+
+	var newAnimLoop = getNewAnimLoop(player.animLoop);
+	// Change to be constant based for slower animating enemies
+	let animShouldChange = newAnimLoop === 0;
+	let isMoving = action.left || action.right || action.up || action.down;
+	var newBgMoveX = getNewBgMoveX(animShouldChange, player.bgMoveX, MAX_PC_BG_MOVE_X, isMoving);
+
+	var newBgMoveY = getNewBgMoveY(action, player.bgMoveY);
+	var reversedBgMap = Object.keys(PC_BG_MOVE_Y_MAP).map(key => {
+		var val = PC_BG_MOVE_Y_MAP[`${ key }`];
+		return { [`${ val }`]: key };
+	})
+
+	if (newBgMoveY === reversedBgMap.up || newBgMoveY === reversedBgMap.down) {
+		newDir = 'vertical';
+	} else {
+		newDir = 'horizontal';
+	}
+
+	var newPosX = findNewPosX(action.left, action.right, player.posX, newDir);
+	var newPosY = findNewPosY(action.up, action.down, player.posY);
+	var newCoords = evalObstacles(oldPosX, oldPosY, newPosX, newPosY, obstacles, newDir, oldDir);
+	newPosX = newCoords[0];
+	newPosY = newCoords[1];
+
+	return { 
+		posX: newPosX,
+		posY: newPosY,
+		dir: newDir,
+		bgMoveX: newBgMoveX,
+		bgMoveY: newBgMoveY,
+		animLoop: newAnimLoop
+	}
+}
+
 const initialState = {
 	screenActive: false,
 	obstacles: [],
@@ -179,16 +246,16 @@ const initialState = {
 		{
 			type: 'archer',
 			id: 'archer8543',
-			posX: -100,
-			posY: -100,
+			posX: 200,
+			posY: 200,
 			dir: 'up',
 			health: 2
 		},
 		{
 			type: 'archer',
 			id: 'archer8544',
-			posX: -60,
-			posY: -60,
+			posX: 300,
+			posY: 300,
 			dir: 'left',
 			health: 2
 		}
@@ -230,53 +297,14 @@ const gameData = (state = initialState, action) => {
 					[`${action.dir}Movement`]: false
 				}
 			}
-		case MOVE_CHAR: 
-			// REFACTOR THIS
-			var newBgMoveX, newAnimLoop, newDir;
-			var oldPosX = state.player.posX;
-			var oldPosY = state.player.posY;
-
-			newAnimLoop = state.player.animLoop + 1;
-			if (newAnimLoop > 1) {
-				newAnimLoop = 0;
-				if (action.left || action.right || action.up || action.down) {
-					newBgMoveX = state.player.bgMoveX + 1;
-				} else {
-					newBgMoveX = 0;
-				}
-
-				if (newBgMoveX > MAX_PC_BG_MOVE_X) {
-					newBgMoveX = 0;
-				}
-			} else {
-				newBgMoveX = state.player.bgMoveX;
-			}
-
-			var oldDir = state.player.dir;
-			var newBgMoveY = getNewBgMoveY(action, state.player.bgMoveY);
-			// rewrite to be based on map in constants.js
-			if (newBgMoveY === 0 || newBgMoveY === 2) {
-				newDir = 'vertical';
-			} else {
-				newDir = 'horizontal';
-			}
-
-			var newPosX = findNewPosX(action.left, action.right, state.player.posX, newDir);
-			var newPosY = findNewPosY(action.up, action.down, state.player.posY);
-			var newCoords = evalObstacles(oldPosX, oldPosY, newPosX, newPosY, state.obstacles, newDir, oldDir);
-			newPosX = newCoords[0];
-			newPosY = newCoords[1];
+		case REFRESH_SCREEN:
+			var proposedCharMove = moveChar(state.player, action, state.obstacles);
 
 			return {
 				...state,
 				player: {
 					...state.player,
-					posX: newPosX,
-					posY: newPosY,
-					dir: newDir,
-					bgMoveX: newBgMoveX,
-					bgMoveY: getNewBgMoveY(action, state.player.bgMoveY),
-					animLoop: newAnimLoop
+					...proposedCharMove
 				}
 			}
 		case SET_NEW_ENEMY_POS:

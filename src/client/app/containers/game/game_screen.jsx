@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { makeScreenActive, createObstacle } from '../../actions/index.js';
+import { makeScreenActive, createObstacle, refreshScreen } from '../../actions/index.js';
 import PlayerCharacter from './player_character.jsx';
 import ArcherEnemy from './archer_enemy.jsx';
 import Obstacle from '../../components/game/obstacle.jsx';
+import { REFRESH_MS } from '../../constants/game.js';
 
 const enemies = {
 	'archer': ArcherEnemy
@@ -12,6 +13,14 @@ const enemies = {
 class GameScreen extends Component {
 	componentWillMount() {
 		this.registerObstacles();
+		this.refreshScreen();
+	}
+
+	refreshScreen() {
+		setInterval(() => {
+			let props = this.props;
+			props.refreshScreen(props.movingUp, props.movingDown, props.movingLeft, props.movingRight);
+		}, REFRESH_MS)
 	}
 
 	registerObstacles() {
@@ -63,7 +72,11 @@ const mapStateToProps = (state, ownProps) => {
 	return {
 		screenActive: state.gameData.screenActive,
 		obstacles: state.gameData.obstacles,
-		enemies: state.gameData.enemies
+		enemies: state.gameData.enemies,
+		movingUp: state.gameData.player.upMovement,
+		movingDown: state.gameData.player.downMovement,
+		movingLeft: state.gameData.player.leftMovement,
+		movingRight: state.gameData.player.rightMovement
 	}
 }
 
@@ -74,6 +87,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 		},
 		createObstacle: (key) => {
 			dispatch(createObstacle(key));
+		},
+		refreshScreen: (up, down, left, right) => {
+			dispatch(refreshScreen(up, down, left, right));
 		}
 	}
 }

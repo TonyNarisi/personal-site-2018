@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { moveChar, registerKeyDown, registerKeyUp } from '../../actions/index.js';
-import { REFRESH_MS } from '../../constants/game.js';
+import { registerKeyDown, registerKeyUp } from '../../actions/index.js';
 import {
 	ARROW_KEYCODES,
 	PLAYER_CHAR_WIDTH,
@@ -28,15 +27,6 @@ class PlayerCharacter extends Component {
 				props.registerKeyUp(e);
 			}
 		})
-
-		this.refreshCharMovement();
-	}
-
-	refreshCharMovement() {
-		setInterval(() => {
-			let props = this.props;
-			props.moveChar(props.movingUp, props.movingDown, props.movingLeft, props.movingRight);
-		}, REFRESH_MS)
 	}
 
 	isArrow(code) {
@@ -71,11 +61,7 @@ const mapStateToProps = (state, ownProps) => {
 		posY: state.gameData.player.posY,
 		bgMoveX: state.gameData.player.bgMoveX,
 		bgMoveY: state.gameData.player.bgMoveY,
-		health: state.gameData.player.health,
-		movingUp: state.gameData.player.upMovement,
-		movingDown: state.gameData.player.downMovement,
-		movingLeft: state.gameData.player.leftMovement,
-		movingRight: state.gameData.player.rightMovement
+		health: state.gameData.player.health
 	}
 }
 
@@ -86,9 +72,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 		},
 		registerKeyUp: (e) => {
 			dispatch(registerKeyUp(e));
-		},
-		moveChar: (up, down, left, right) => {
-			dispatch(moveChar(up, down, left, right));
 		}
 	}
 }

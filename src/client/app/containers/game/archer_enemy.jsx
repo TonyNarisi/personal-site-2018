@@ -88,8 +88,8 @@ class ArcherEnemy extends Component {
 				style={{
 					height: `${ ARCHER_ENEMY.HEIGHT }px`,
 					width: `${ ARCHER_ENEMY.WIDTH }px`,
-					top: `calc(50% - ${ props.posY - (ARCHER_ENEMY.HEIGHT/2) }px)`,
-					left: `calc(50% - ${ props.posX - (ARCHER_ENEMY.WIDTH/2) }px`,
+					top: `${ props.posY }px`,
+					left: `${ props.posX }px`,
 					// temporary
 					backgroundColor: '#303030'
 				}}>
