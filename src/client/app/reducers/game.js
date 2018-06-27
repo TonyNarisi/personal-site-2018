@@ -232,6 +232,7 @@ const moveChar = (player, action, obstacles) => {
 
 const getEnemyNewX = (dir, posX, enemyArr) => {
 	var newPosX = posX;
+	var collision = false;
 
 	if (dir === 'left') {
 		newPosX = posX + enemyArr.MOVE_RATE;
@@ -241,15 +242,18 @@ const getEnemyNewX = (dir, posX, enemyArr) => {
 
 	if (newPosX < 0) {
 		newPosX = 0;
+		collision = true;
 	} else if (newPosX > GAME_SCREEN_WIDTH - enemyArr.WIDTH) {
 		newPosX = GAME_SCREEN_WIDTH - enemyArr.WIDTH;
+		collision = true;
 	}
 
-	return newPosX;
+	return { pos: newPosX, collision };
 }
 
 const getEnemyNewY = (dir, posY, enemyConst) => {
 	var newPosY = posY;
+	var collision = false;
 
 	if (dir === 'up') {
 		newPosY = posY + enemyConst.MOVE_RATE;
@@ -259,16 +263,18 @@ const getEnemyNewY = (dir, posY, enemyConst) => {
 
 	if (newPosY < 0) {
 		newPosY = 0;
+		collision = true;
 	} else if (newPosY > GAME_SCREEN_HEIGHT - enemyConst.HEIGHT) {
 		newPosY = GAME_SCREEN_HEIGHT - enemyConst.HEIGHT;
+		collision = true;
 	}
 
-	return newPosY;
+	return { pos: newPosY, collision };
 }
 
-const getNewDirLoop = (dirLoop, enemyConst) => {
+const getNewDirLoop = (dirLoop, enemyConst, collision) => {
 	var newDirLoop = dirLoop + 1;
-	if (newDirLoop > enemyConst.DIR_LOOP_MAX) {
+	if (newDirLoop > enemyConst.DIR_LOOP_MAX || collision) {
 		newDirLoop = 0;
 	}
 	return newDirLoop;
@@ -285,16 +291,17 @@ const moveEnemy = enemy => {
 	})[0];
 	var newX = getEnemyNewX(enemy.dir, enemy.posX, enemyConst);
 	var newY = getEnemyNewY(enemy.dir, enemy.posY, enemyConst);
-	var newDirLoop = getNewDirLoop(enemy.dirLoop, enemyConst)
+	var collision = newX.collision || newY.collision;
+	var newDirLoop = getNewDirLoop(enemy.dirLoop, enemyConst, collision)
 	if (newDirLoop === 0) {
 		var newDir = getNewDir();
 	} else {
-		var newDir = enemy.dir;
+		var newDir = enemy.dir
 	}
 	return {
 		...enemy,
-		posX: newX,
-		posY: newY,
+		posX: newX.pos,
+		posY: newY.pos,
 		dirLoop: newDirLoop,
 		dir: newDir
 	}
