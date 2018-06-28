@@ -203,12 +203,7 @@ const moveChar = (player, action, obstacles) => {
 	var newBgMoveX = getNewBgMoveX(animShouldChange, player.bgMoveX, MAX_PC_BG_MOVE_X, isMoving);
 
 	var newBgMoveY = getNewBgMoveY(action, player.bgMoveY);
-	var reversedBgMap = Object.keys(PC_BG_MOVE_Y_MAP).map(key => {
-		var val = PC_BG_MOVE_Y_MAP[`${ key }`];
-		return { [`${ val }`]: key };
-	})
-
-	if (newBgMoveY === reversedBgMap.up || newBgMoveY === reversedBgMap.down) {
+	if (newBgMoveY === PC_BG_MOVE_Y_MAP.up || newBgMoveY === PC_BG_MOVE_Y_MAP.down) {
 		newDir = 'vertical';
 	} else {
 		newDir = 'horizontal';
@@ -285,13 +280,76 @@ const getNewDir = () => {
 	return POTENTIAL_DIRS[idx];
 }
 
-const moveEnemy = enemy => {
+const evalEnemyAgainstObs = (posX, posY, obs, enemyConst) => {
+	// needs major refactor
+	let top = posY;
+	let bottom = posY + enemyConst.HEIGHT;
+	let right = posX + enemyConst.WIDTH;
+	let left = posX;
+	var isInsideX = false;
+	var isInsideY = false;
+	let xRange = [obs.left, obs.left + obs.width];
+	let yRange = [obs.top, obs.top + obs.height];
+
+	if (left > xRange[0] && left < xRange[1] || right > xRange[0] && right < xRange[1]) {
+		isInsideX = true;
+	}
+	if (
+		(xRange[0] >= left && xRange[1] <= right) ||
+		(xRange[0] <= left && xRange[1] >= right) ||
+		(xRange[0] <= left && xRange[1] >= right)
+	) {
+		isInsideX = true;
+	}
+
+	if (top > yRange[0] && top < yRange[1] || bottom > yRange[0] && bottom < yRange[1]) {
+		isInsideY = true;
+	}
+	if (
+		(yRange[0] >= top && yRange[1] <= bottom) ||
+		(yRange[0] <= top && yRange[0] >= bottom) ||
+		(yRange[1] <= top && yRange[1] >= bottom)
+	) {
+		isInsideY = true;
+	}
+
+	return isInsideX && isInsideY;
+}
+
+const detectObsEnemyColl = (oldX, oldY, newX, newY, enemyConst, obstacles) => {
+	var correctedX = newX;
+	var correctedY = newY;
+	for (var obstacleNum = obstacles.length, i = 0; i < obstacleNum; i++) {
+		var noMoveY = false;
+		var noMoveX = false;
+		var isInside = evalEnemyAgainstObs(newX, newY, obstacles[i], enemyConst);
+
+		if (isInside) {
+			var noMoveY = evalEnemyAgainstObs(oldX, newY, obstacles[i], enemyConst);
+			var noMoveX = evalEnemyAgainstObs(newX, oldY, obstacles[i], enemyConst);
+		}
+
+		if (noMoveY) {
+			correctedY = oldY;
+		}	
+		if (noMoveX) {
+			correctedX = oldX;
+		}
+	}
+	return [correctedX, correctedY];
+}
+
+const moveEnemy = (enemy, obstacles) => {
 	let enemyConst = enemyArr.filter(proto => {
 		return proto.type === enemy.type;
 	})[0];
 	var newX = getEnemyNewX(enemy.dir, enemy.posX, enemyConst);
 	var newY = getEnemyNewY(enemy.dir, enemy.posY, enemyConst);
-	var collision = newX.collision || newY.collision;
+	var correctedCoords = detectObsEnemyColl(enemy.posX, enemy.posY, newX.pos, newY.pos, enemyConst, obstacles);
+	var correctedX = correctedCoords[0];
+	var correctedY = correctedCoords[1];
+	var obsCollision = correctedX != newX.pos || correctedY != newY.pos;
+	var collision = newX.collision || newY.collision || obsCollision;
 	var newDirLoop = getNewDirLoop(enemy.dirLoop, enemyConst, collision)
 	if (newDirLoop === 0) {
 		var newDir = getNewDir();
@@ -300,8 +358,8 @@ const moveEnemy = enemy => {
 	}
 	return {
 		...enemy,
-		posX: newX.pos,
-		posY: newY.pos,
+		posX: correctedX,
+		posY: correctedY,
 		dirLoop: newDirLoop,
 		dir: newDir
 	}
@@ -382,9 +440,10 @@ const gameData = (state = initialState, action) => {
 				}
 			}
 		case REFRESH_SCREEN:
-			var proposedCharMove = moveChar(state.player, action, state.obstacles);
+			let obs = state.obstacles;
+			var proposedCharMove = moveChar(state.player, action, obs);
 			var proposedEnemyMoves = state.enemies.map(enemy => {
-				return moveEnemy(enemy);
+				return moveEnemy(enemy, obs);
 			})
 
 			return {
