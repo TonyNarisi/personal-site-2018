@@ -339,6 +339,43 @@ const detectObsEnemyColl = (oldX, oldY, newX, newY, enemyConst, obstacles) => {
 	return [correctedX, correctedY];
 }
 
+const detectCharEnemyColl = (charMove, enemyMoves) => {
+	let userTop = charMove.posY;
+	let userBottom = charMove.posY + PLAYER_CHAR_HEIGHT;
+	let userRight = charMove.posX + PLAYER_CHAR_WIDTH - (PLAYER_CHAR_INNER_HITBOX_HOR[charMove.dir]/2);
+	let userLeft = charMove.posX + (PLAYER_CHAR_INNER_HITBOX_HOR[charMove.dir]/2);
+	var enemyColl = false;
+
+	for (var enemyNum = enemyMoves.length, i = 0; i < enemyNum; i++) {
+		let curMove = enemyMoves[i];
+		let enemyRules = enemyArr.filter(proto => {
+			return proto.type === curMove.type;
+		})[0];
+		let enemyTop = curMove.posY;
+		let enemyBottom = curMove.posY + enemyRules.HEIGHT;
+		let enemyRight = curMove.posX + enemyRules.WIDTH;
+		let enemyLeft = curMove.posX;
+		var userInsideEnemyY = (userTop > enemyTop && userTop < enemyBottom) || (userBottom < enemyBottom && userBottom > enemyTop);
+		var enemyInsideUserY = (enemyTop > userTop && enemyTop < userBottom) || (enemyBottom < userBottom && enemyBottom > userTop);
+		if (userInsideEnemyY || enemyInsideUserY) {
+			var isInsideY = true;
+		} else {
+			var isInsideY = false;
+		}
+		var userInsideEnemyX = (userLeft > enemyLeft && userLeft < enemyRight) || (userRight > enemyLeft && userRight < enemyRight);
+		var enemyInsideUserX = (enemyLeft > userLeft && enemyLeft < userRight) || (enemyRight > userLeft && enemyRight < userRight);
+		if (userInsideEnemyX || enemyInsideUserX) {
+			var isInsideX = true;
+		} else {
+			var isInsideX = false;
+		}
+		if (isInsideY && isInsideX) {
+			enemyColl = true;
+		}
+	}
+	return enemyColl;
+}
+
 const moveEnemy = (enemy, obstacles) => {
 	let enemyConst = enemyArr.filter(proto => {
 		return proto.type === enemy.type;
@@ -445,6 +482,10 @@ const gameData = (state = initialState, action) => {
 			var proposedEnemyMoves = state.enemies.map(enemy => {
 				return moveEnemy(enemy, obs);
 			})
+			var charEnemyCollision = detectCharEnemyColl(proposedCharMove, proposedEnemyMoves);
+			if (charEnemyCollision) {
+				proposedCharMove.health = state.player.health - 1;
+			}
 
 			return {
 				...state,

@@ -10,3 +10,9 @@
 .game__obstacle {
 	position: absolute;
 }
+
+.game__player-health {
+	max-width: 40px;
+	position: relative;
+	z-index: 3;
+}
