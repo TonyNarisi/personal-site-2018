@@ -44,7 +44,7 @@ const config = {
 				loader: 'babel-loader'
 			},
 			{
-				test: /\.(png|jpg)$/,
+				test: /\.(png|jpg|gif)$/,
 				loader: 'file-loader'
 			}
 		]

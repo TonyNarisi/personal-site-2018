@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { moveChar, registerKeyDown, registerKeyUp } from '../../actions/index.js';
-import { REFRESH_MS } from '../../constants/game.js';
+import { registerKeyDown, registerKeyUp } from '../../actions/index.js';
 import {
 	ARROW_KEYCODES,
 	PLAYER_CHAR_WIDTH,
@@ -17,7 +16,6 @@ class PlayerCharacter extends Component {
 	componentWillMount() {
 		document.addEventListener('keydown', (e) => {
 			let props = this.props;
-			console.log(e);
 			if (props.screenActive && this.isArrow(e.keyCode)) {
 				props.registerKeyDown(e);
 			}
@@ -29,15 +27,6 @@ class PlayerCharacter extends Component {
 				props.registerKeyUp(e);
 			}
 		})
-
-		this.refreshCharMovement();
-	}
-
-	refreshCharMovement() {
-		setInterval(() => {
-			let props = this.props;
-			props.moveChar(props.movingUp, props.movingDown, props.movingLeft, props.movingRight);
-		}, REFRESH_MS)
 	}
 
 	isArrow(code) {
@@ -53,8 +42,8 @@ class PlayerCharacter extends Component {
 				style={{
 					height: `${ PLAYER_CHAR_HEIGHT }px`,
 					width: `${ PLAYER_CHAR_WIDTH }px`,
-					left: `calc(50% - ${ props.posX - (PLAYER_CHAR_WIDTH/2) }px)`,
-					top: `calc(50% - ${ props.posY - (PLAYER_CHAR_HEIGHT/2) }px)`,
+					left: `${ props.posX }px`,
+					top: `${ props.posY }px`,
 					backgroundImage: `url(${ charWalkcycle })`,
 					backgroundPositionX: `${ (props.bgMoveX * PLAYER_CHAR_SPRITE_WIDTH) - PLAYER_CHAR_X_OFFSET }px`,
 					backgroundPositionY: `${ (props.bgMoveY * PLAYER_CHAR_SPRITE_HEIGHT) - PLAYER_CHAR_Y_OFFSET }px`
@@ -72,11 +61,7 @@ const mapStateToProps = (state, ownProps) => {
 		posY: state.gameData.player.posY,
 		bgMoveX: state.gameData.player.bgMoveX,
 		bgMoveY: state.gameData.player.bgMoveY,
-		health: state.gameData.player.health,
-		movingUp: state.gameData.player.upMovement,
-		movingDown: state.gameData.player.downMovement,
-		movingLeft: state.gameData.player.leftMovement,
-		movingRight: state.gameData.player.rightMovement
+		health: state.gameData.player.health
 	}
 }
 
@@ -87,9 +72,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 		},
 		registerKeyUp: (e) => {
 			dispatch(registerKeyUp(e));
-		},
-		moveChar: (up, down, left, right) => {
-			dispatch(moveChar(up, down, left, right));
 		}
 	}
 }
