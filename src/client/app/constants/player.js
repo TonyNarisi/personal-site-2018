@@ -16,5 +16,7 @@ export const PC_BG_MOVE_Y_MAP = {
 	'left': 3,
 	'right': 1
 }
+export const REV_PC_Y_MAP = ['up', 'right', 'down', 'left'];
+export const REV_PC_Y_MAP_COLL = ['down', 'left', 'up', 'right'];
 export const MOVEMENT_RATE = 3;
 export const ARROW_KEYCODES = [37,38,39,40];
