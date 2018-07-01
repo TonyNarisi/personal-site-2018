@@ -1,6 +1,7 @@
 import {
 	GAME_SCREEN_HEIGHT,
-	GAME_SCREEN_WIDTH
+	GAME_SCREEN_WIDTH,
+	OPPOSITE_DIRS
 } from '../constants/game.js'
 import {
 	MOVEMENT_RATE,
@@ -9,7 +10,9 @@ import {
 	PLAYER_CHAR_INNER_HITBOX_VERT,
 	PLAYER_CHAR_INNER_HITBOX_HOR,
 	MAX_PC_BG_MOVE_X,
-	PC_BG_MOVE_Y_MAP
+	PC_BG_MOVE_Y_MAP,
+	REV_PC_Y_MAP,
+	REV_PC_Y_MAP_COLL
 } from '../constants/player.js';
 import {
 	POTENTIAL_DIRS,
@@ -190,6 +193,34 @@ const getNewBgMoveX = (shouldChange, bgMoveX, max, isMoving) => {
 	return newBgMoveX;
 }
 
+const moveCharFromCollision = (player, obstacles) => {
+	var oldPosX = player.posX;
+	var oldPosY = player.posY;
+
+	let hitDir = player.hitDir;
+	let left = hitDir === 'left';
+	let right = hitDir === 'right';
+	let up = hitDir === 'up';
+	let down = hitDir === 'down';
+
+	if (left || right) {
+		var dir = 'horizontal';
+	} else {
+		var dir = 'vertical';
+	}
+
+	var newPosX = findNewPosX(left, right, oldPosX, dir);
+	var newPosY = findNewPosY(up, down, oldPosY);
+	var newCoords = evalObstacles(oldPosX, oldPosY, newPosX, newPosY, obstacles, dir, dir);
+	newPosX = newCoords[0];
+	newPosY = newCoords[1];
+
+	return {
+		posX: newPosX,
+		posY: newPosY
+	}
+}
+
 const moveChar = (player, action, obstacles) => {
 	var newDir;
 	var oldPosX = player.posX;
@@ -340,6 +371,7 @@ const detectObsEnemyColl = (oldX, oldY, newX, newY, enemyConst, obstacles) => {
 }
 
 const detectCharEnemyColl = (charMove, enemyMoves) => {
+	var enemyId;
 	let userTop = charMove.posY;
 	let userBottom = charMove.posY + PLAYER_CHAR_HEIGHT;
 	let userRight = charMove.posX + PLAYER_CHAR_WIDTH - (PLAYER_CHAR_INNER_HITBOX_HOR[charMove.dir]/2);
@@ -371,9 +403,13 @@ const detectCharEnemyColl = (charMove, enemyMoves) => {
 		}
 		if (isInsideY && isInsideX) {
 			enemyColl = true;
+			enemyId = curMove.id;
 		}
 	}
-	return enemyColl;
+	return {
+		didHappen: enemyColl,
+		enemyId: enemyId
+	};
 }
 
 const moveEnemy = (enemy, obstacles) => {
@@ -409,10 +445,13 @@ const initialState = {
 		posX: GAME_SCREEN_WIDTH/2 - PLAYER_CHAR_WIDTH/2,
 		posY: GAME_SCREEN_HEIGHT/2 - PLAYER_CHAR_HEIGHT/2,
 		dir: 'vertical',
+		hitDir: 'left',
 		bgMoveX: 0,
 		bgMoveY: 2,
 		animLoop: 0,
 		health: 4,
+		isGettingHit: false,
+		hitLoop: 0,
 		upMovement: false,
 		downMovement: false,
 		leftMovement: false,
@@ -478,19 +517,43 @@ const gameData = (state = initialState, action) => {
 			}
 		case REFRESH_SCREEN:
 			let obs = state.obstacles;
-			var proposedCharMove = moveChar(state.player, action, obs);
+			let player = state.player;
+			if (!player.isGettingHit) {
+				var proposedCharMove = moveChar(player, action, obs);
+			} else {
+				var proposedCharMove = moveCharFromCollision(player, obs);
+				proposedCharMove.hitLoop = player.hitLoop + 1;
+			}
+			if (proposedCharMove.hitLoop > 10) {
+				proposedCharMove.hitLoop = 0;
+				proposedCharMove.isGettingHit = false;
+			}
 			var proposedEnemyMoves = state.enemies.map(enemy => {
 				return moveEnemy(enemy, obs);
 			})
-			var charEnemyCollision = detectCharEnemyColl(proposedCharMove, proposedEnemyMoves);
-			if (charEnemyCollision) {
-				proposedCharMove.health = state.player.health - 1;
+			var charEnemyCollision = (player.isGettingHit ? false : detectCharEnemyColl(proposedCharMove, proposedEnemyMoves));
+			if (charEnemyCollision.didHappen) {
+				proposedCharMove.health = player.health - 1;
+				proposedCharMove.isGettingHit = true;
+				// Replace with a function that determines the direction of the actual hit and reverses it
+				proposedCharMove.hitDir = REV_PC_Y_MAP_COLL[proposedCharMove.bgMoveY];
+				proposedEnemyMoves = proposedEnemyMoves.map(enemy => {
+					return(
+						enemy.id === charEnemyCollision.enemyId ?
+								{
+									...enemy,
+									dir: OPPOSITE_DIRS[enemy.dir]
+								}
+							:
+								enemy
+					)
+				})
 			}
 
 			return {
 				...state,
 				player: {
-					...state.player,
+					...player,
 					...proposedCharMove
 				},
 				enemies: proposedEnemyMoves
