@@ -4,7 +4,8 @@ import { makeScreenActive, createObstacle, refreshScreen } from '../../actions/i
 import PlayerCharacter from './player_character.jsx';
 import ArcherEnemy from './archer_enemy.jsx';
 import Obstacle from '../../components/game/obstacle.jsx';
-import { REFRESH_MS } from '../../constants/game.js';
+import BgTile from '../../components/game/bg_tile.jsx';
+import { REFRESH_MS, BG_TILE_HEIGHT, BG_TILE_WIDTH, GAME_SCREEN_HEIGHT, GAME_SCREEN_WIDTH } from '../../constants/game.js';
 import heart from '../../../public/assets/game/anatomical-heart.gif';
 
 const enemies = {
@@ -37,6 +38,16 @@ class GameScreen extends Component {
 		for (var i = 0; i < props.health; i++) {
 			healthArr.push(`h${i}`);
 		}
+		let numOfBgCols = Math.ceil(GAME_SCREEN_WIDTH/BG_TILE_WIDTH);
+		let numOfBgRows = Math.ceil(GAME_SCREEN_HEIGHT/BG_TILE_HEIGHT);
+		let bgColArr = [];
+		for (var i = 0; i < numOfBgCols; i++) {
+			bgColArr.push({ name: `col${i}`, num: i });
+		}
+		let bgRowArr = [];
+		for (var i = 0; i < numOfBgRows; i++) {
+			bgRowArr.push({ cols: bgColArr, num: i });
+		}
 		return(
 			<div
 				className="game__outer-wrapper"
@@ -51,6 +62,18 @@ class GameScreen extends Component {
 					)
 				})}
 				<PlayerCharacter />
+				{ bgRowArr.map((row, i) => {
+					return (
+						row.cols.map(col => {
+							return (
+								<BgTile
+									colNum = { col.num }
+									rowNum = { row.num }
+									key={col.name + i} />
+							)
+						})
+					)
+				})}
 				{ props.enemies.map(enemy => {
 					var EnemyComponent = enemies[enemy.type];
 					return (
