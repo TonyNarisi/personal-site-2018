@@ -416,6 +416,15 @@ const moveEnemy = (enemy, obstacles) => {
 	let enemyConst = enemyArr.filter(proto => {
 		return proto.type === enemy.type;
 	})[0];
+
+	let newAnimLoop = getNewAnimLoop(enemy.animLoop);
+	let animShouldChange = newAnimLoop === 0;
+
+	// Use this with false as final parameter when enemy is attacking and not moving to reset animation frame
+	var newBgMoveX = getNewBgMoveX(animShouldChange, enemy.bgMoveX, enemyConst.MAX_BG_MOVE_X, true);
+
+	var newBgMoveY = enemyConst.BG_MOVE_Y_MAP[enemy.dir];
+
 	var newX = getEnemyNewX(enemy.dir, enemy.posX, enemyConst);
 	var newY = getEnemyNewY(enemy.dir, enemy.posY, enemyConst);
 	var correctedCoords = detectObsEnemyColl(enemy.posX, enemy.posY, newX.pos, newY.pos, enemyConst, obstacles);
@@ -433,6 +442,9 @@ const moveEnemy = (enemy, obstacles) => {
 		...enemy,
 		posX: correctedX,
 		posY: correctedY,
+		animLoop: newAnimLoop,
+		bgMoveX: newBgMoveX,
+		bgMoveY: newBgMoveY,
 		dirLoop: newDirLoop,
 		dir: newDir
 	}
@@ -466,7 +478,10 @@ const initialState = {
 			posY: 200,
 			dirLoop: 0,
 			dir: 'up',
-			health: 2
+			health: 2,
+			bgMoveX: 0,
+			bgMoveY: 0,
+			animLoop: 0
 		},
 		{
 			type: 'archer',
@@ -475,7 +490,10 @@ const initialState = {
 			posY: 300,
 			dirLoop: 0,
 			dir: 'left',
-			health: 2
+			health: 2,
+			bgMoveX: 0,
+			bgMoveY: 0,
+			animLoop: 0
 		}
 	]
 };

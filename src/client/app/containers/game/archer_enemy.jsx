@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { ARCHER_ENEMY } from '../../constants/enemies.js';
+import walkcycle from '../../../public/assets/game/walkcycles/mage-walking.png';
 
 class ArcherEnemy extends Component {
 	render() {
@@ -13,8 +14,9 @@ class ArcherEnemy extends Component {
 					width: `${ ARCHER_ENEMY.WIDTH }px`,
 					top: `${ props.posY }px`,
 					left: `${ props.posX }px`,
-					// temporary
-					backgroundColor: '#303030'
+					backgroundImage: `url(${ walkcycle })`,
+					backgroundPositionX: `${ (props.bgMoveX * ARCHER_ENEMY.SPRITE_WIDTH) - ARCHER_ENEMY.X_OFFSET }px`,
+					backgroundPositionY: `${ (props.bgMoveY * ARCHER_ENEMY.SPRITE_HEIGHT) - ARCHER_ENEMY.Y_OFFSET }px`
 				}}>
 			</div>
 		)
@@ -24,7 +26,9 @@ class ArcherEnemy extends Component {
 const mapStateToProps = (state, ownProps) => {
 	return {
 		posX: ownProps.posX,
-		posY: ownProps.posY
+		posY: ownProps.posY,
+		bgMoveX: ownProps.bgMoveX,
+		bgMoveY: ownProps.bgMoveY
 	}
 };
 

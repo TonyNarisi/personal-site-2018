@@ -80,9 +80,10 @@ class GameScreen extends Component {
 						<EnemyComponent
 							key={ enemy.id }
 							id={ enemy.id }
-							dir={ enemy.dir }
 							posX={ enemy.posX }
-							posY={ enemy.posY } />
+							posY={ enemy.posY }
+							bgMoveX={ enemy.bgMoveX }
+							bgMoveY={ enemy.bgMoveY } />
 					)
 				})}
 				{ props.obstacles.map(obstacle => {
