@@ -508,7 +508,10 @@ const gameData = (state = initialState, action) => {
 					'left': action.left,
 					'top': action.top,
 					'width': action.width,
-					'height': action.height
+					'height': action.height,
+					'spriteWidth': action.spriteWidth,
+					'spriteHeight': action.spriteHeight,
+					'type': action.spriteType
 				}])
 			}
 		case MAKE_SCREEN_ACTIVE:

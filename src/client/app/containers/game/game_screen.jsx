@@ -26,7 +26,7 @@ class GameScreen extends Component {
 	}
 
 	registerObstacles() {
-		var numObstacles = Math.ceil((Math.random() * 4));
+		var numObstacles = Math.ceil((Math.random() * 3));
 		for (var i = 0; i < numObstacles; i++) {
 			this.props.createObstacle(i);
 		}
@@ -90,6 +90,9 @@ class GameScreen extends Component {
 					return(
 						<Obstacle 
 							key={ obstacle.key }
+							type={ obstacle.type }
+							spriteHeight={ obstacle.spriteHeight }
+							spriteWidth={ obstacle.spriteWidth }
 							height={ obstacle.height }
 							width={ obstacle.width }
 							left={ obstacle.left }

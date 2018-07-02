@@ -1,4 +1,5 @@
 import { GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT } from '../constants/game.js';
+import { TYPES } from '../constants/obstacles.js';
 
 export const MAKE_SCREEN_ACTIVE = 'MAKE_SCREEN_ACTIVE';
 export const REGISTER_KEY_DOWN = 'REGISTER_KEY_DOWN';
@@ -21,11 +22,20 @@ const determineDir = (code) => {
 }
 
 export function createObstacle(key) {
-	let width = Math.ceil(Math.random() * 100) + 20;
-	let height = Math.ceil(Math.random() * 100) + 20;
-	let top = Math.ceil(Math.random() * (GAME_SCREEN_HEIGHT - height));
-	let left = Math.ceil(Math.random() * (GAME_SCREEN_WIDTH - width));
-	return { type: CREATE_OBSTACLE, width, height, top, left, key };
+	let thisObs = TYPES[Math.floor(Math.random() * TYPES.length)];
+	let top = Math.ceil(Math.random() * (GAME_SCREEN_HEIGHT - thisObs.spriteHeight));
+	let left = Math.ceil(Math.random() * (GAME_SCREEN_WIDTH - thisObs.spriteWidth));
+	return {
+		type: CREATE_OBSTACLE,
+		spriteWidth: thisObs.spriteWidth,
+		spriteHeight: thisObs.spriteHeight,
+		width: thisObs.width,
+		height: thisObs.height,
+		spriteType: thisObs.type,
+		top,
+		left,
+		key
+	};
 }
 
 export function makeScreenActive() {
