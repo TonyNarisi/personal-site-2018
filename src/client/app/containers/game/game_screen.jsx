@@ -21,7 +21,9 @@ class GameScreen extends Component {
 	refreshScreen() {
 		setInterval(() => {
 			let props = this.props;
-			props.refreshScreen(props.movingUp, props.movingDown, props.movingLeft, props.movingRight);
+			if (props.screenActive) {
+				props.refreshScreen(props.movingUp, props.movingDown, props.movingLeft, props.movingRight);
+			}
 		}, REFRESH_MS)
 	}
 

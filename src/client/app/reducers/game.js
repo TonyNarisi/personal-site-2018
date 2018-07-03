@@ -12,7 +12,9 @@ import {
 	MAX_PC_BG_MOVE_X,
 	PC_BG_MOVE_Y_MAP,
 	REV_PC_Y_MAP,
-	REV_PC_Y_MAP_COLL
+	REV_PC_Y_MAP_COLL,
+	PLAYER_CHAR_COLL_HEIGHT,
+	PLAYER_CHAR_COLL_Y_OFFSET
 } from '../constants/player.js';
 import {
 	POTENTIAL_DIRS,
@@ -87,16 +89,16 @@ const getNewBgMoveY = (action, bgMoveY) => {
 	return bgMoveY;
 }
 
-const evalPlayerAgainstObs = (posX, posY, obs, dir, oldDir) => {
+const evalPlayerAgainstObs = (posX, posY, obs, dir) => {
 	// needs major refactor
-	let top = posY;
+	let top = posY + PLAYER_CHAR_COLL_Y_OFFSET;
 	let bottom = posY + PLAYER_CHAR_HEIGHT;
 	let right = posX + PLAYER_CHAR_WIDTH - PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2;
 	let left = posX + (PLAYER_CHAR_INNER_HITBOX_HOR[dir]/2);
 	var isInsideX = false;
 	var isInsideY = false;
 	let xRange = [obs.left, obs.left + obs.width];
-	let yRange = [obs.top, obs.top + obs.height];
+	let yRange = [obs.top + obs.hitBoxYOffset, obs.top + obs.hitBoxYOffset + obs.height];
 
 	if (left > xRange[0] && left < xRange[1] || right > xRange[0] && right < xRange[1]) {
 		isInsideX = true;
@@ -256,21 +258,26 @@ const moveChar = (player, action, obstacles) => {
 	}
 }
 
-const getEnemyNewX = (dir, posX, enemyArr) => {
+const getEnemyNewX = (dir, posX, enemyConst) => {
 	var newPosX = posX;
 	var collision = false;
+	var facing;
 
 	if (dir === 'left') {
-		newPosX = posX + enemyArr.MOVE_RATE;
+		facing = 'horizontal';
+		newPosX = posX + enemyConst.MOVE_RATE;
 	} else if (dir === 'right') {
-		newPosX = posX - enemyArr.MOVE_RATE;
+		facing = 'horizontal';
+		newPosX = posX - enemyConst.MOVE_RATE;
+	} else {
+		facing = 'vertical';
 	}
 
-	if (newPosX < 0) {
+	if (newPosX < -(enemyConst.INNER_HITBOX_HOR[facing]/2)) {
 		newPosX = 0;
 		collision = true;
-	} else if (newPosX > GAME_SCREEN_WIDTH - enemyArr.WIDTH) {
-		newPosX = GAME_SCREEN_WIDTH - enemyArr.WIDTH;
+	} else if (newPosX > GAME_SCREEN_WIDTH - enemyConst.WIDTH + (enemyConst.INNER_HITBOX_HOR[facing]/2)) {
+		newPosX = GAME_SCREEN_WIDTH - enemyConst.WIDTH;
 		collision = true;
 	}
 
@@ -311,16 +318,21 @@ const getNewDir = () => {
 	return POTENTIAL_DIRS[idx];
 }
 
-const evalEnemyAgainstObs = (posX, posY, obs, enemyConst) => {
+const evalEnemyAgainstObs = (posX, posY, obs, enemyConst, dir) => {
 	// needs major refactor
-	let top = posY;
+	let top = posY + enemyConst.COLL_Y_OFFSET;
 	let bottom = posY + enemyConst.HEIGHT;
-	let right = posX + enemyConst.WIDTH;
-	let left = posX;
+	if (dir === 'left' || dir === 'right') {
+		var facing = 'horizontal';
+	} else {
+		var facing = 'vertical';
+	}
+	let right = posX + enemyConst.WIDTH - (enemyConst.INNER_HITBOX_HOR[facing]/2);
+	let left = posX + (enemyConst.INNER_HITBOX_HOR[facing]/2);
 	var isInsideX = false;
 	var isInsideY = false;
 	let xRange = [obs.left, obs.left + obs.width];
-	let yRange = [obs.top, obs.top + obs.height];
+	let yRange = [obs.top + obs.hitBoxYOffset, obs.top + obs.hitBoxYOffset + obs.height];
 
 	if (left > xRange[0] && left < xRange[1] || right > xRange[0] && right < xRange[1]) {
 		isInsideX = true;
@@ -347,17 +359,17 @@ const evalEnemyAgainstObs = (posX, posY, obs, enemyConst) => {
 	return isInsideX && isInsideY;
 }
 
-const detectObsEnemyColl = (oldX, oldY, newX, newY, enemyConst, obstacles) => {
+const detectObsEnemyColl = (oldX, oldY, newX, newY, enemyConst, obstacles, dir) => {
 	var correctedX = newX;
 	var correctedY = newY;
 	for (var obstacleNum = obstacles.length, i = 0; i < obstacleNum; i++) {
 		var noMoveY = false;
 		var noMoveX = false;
-		var isInside = evalEnemyAgainstObs(newX, newY, obstacles[i], enemyConst);
+		var isInside = evalEnemyAgainstObs(newX, newY, obstacles[i], enemyConst, dir);
 
 		if (isInside) {
-			var noMoveY = evalEnemyAgainstObs(oldX, newY, obstacles[i], enemyConst);
-			var noMoveX = evalEnemyAgainstObs(newX, oldY, obstacles[i], enemyConst);
+			var noMoveY = evalEnemyAgainstObs(oldX, newY, obstacles[i], enemyConst, dir);
+			var noMoveX = evalEnemyAgainstObs(newX, oldY, obstacles[i], enemyConst, dir);
 		}
 
 		if (noMoveY) {
@@ -372,7 +384,7 @@ const detectObsEnemyColl = (oldX, oldY, newX, newY, enemyConst, obstacles) => {
 
 const detectCharEnemyColl = (charMove, enemyMoves) => {
 	var enemyId;
-	let userTop = charMove.posY;
+	let userTop = charMove.posY + PLAYER_CHAR_COLL_Y_OFFSET;
 	let userBottom = charMove.posY + PLAYER_CHAR_HEIGHT;
 	let userRight = charMove.posX + PLAYER_CHAR_WIDTH - (PLAYER_CHAR_INNER_HITBOX_HOR[charMove.dir]/2);
 	let userLeft = charMove.posX + (PLAYER_CHAR_INNER_HITBOX_HOR[charMove.dir]/2);
@@ -383,10 +395,15 @@ const detectCharEnemyColl = (charMove, enemyMoves) => {
 		let enemyRules = enemyArr.filter(proto => {
 			return proto.type === curMove.type;
 		})[0];
-		let enemyTop = curMove.posY;
+		if (curMove.dir === 'left' || curMove.dir === 'right') {
+			var facing = 'horizontal';
+		} else {
+			var facing = 'vertical';
+		}
+		let enemyTop = curMove.posY + enemyRules.COLL_Y_OFFSET;
 		let enemyBottom = curMove.posY + enemyRules.HEIGHT;
-		let enemyRight = curMove.posX + enemyRules.WIDTH;
-		let enemyLeft = curMove.posX;
+		let enemyLeft = curMove.posX + (enemyRules.INNER_HITBOX_HOR[facing]/2);
+		let enemyRight = curMove.posX + enemyRules.WIDTH - enemyRules.INNER_HITBOX_HOR[facing];
 		var userInsideEnemyY = (userTop > enemyTop && userTop < enemyBottom) || (userBottom < enemyBottom && userBottom > enemyTop);
 		var enemyInsideUserY = (enemyTop > userTop && enemyTop < userBottom) || (enemyBottom < userBottom && enemyBottom > userTop);
 		if (userInsideEnemyY || enemyInsideUserY) {
@@ -427,7 +444,7 @@ const moveEnemy = (enemy, obstacles) => {
 
 	var newX = getEnemyNewX(enemy.dir, enemy.posX, enemyConst);
 	var newY = getEnemyNewY(enemy.dir, enemy.posY, enemyConst);
-	var correctedCoords = detectObsEnemyColl(enemy.posX, enemy.posY, newX.pos, newY.pos, enemyConst, obstacles);
+	var correctedCoords = detectObsEnemyColl(enemy.posX, enemy.posY, newX.pos, newY.pos, enemyConst, obstacles, enemy.dir);
 	var correctedX = correctedCoords[0];
 	var correctedY = correctedCoords[1];
 	var obsCollision = correctedX != newX.pos || correctedY != newY.pos;
@@ -509,6 +526,7 @@ const gameData = (state = initialState, action) => {
 					'top': action.top,
 					'width': action.width,
 					'height': action.height,
+					'hitBoxYOffset': action.hitBoxYOffset,
 					'spriteWidth': action.spriteWidth,
 					'spriteHeight': action.spriteHeight,
 					'type': action.spriteType

@@ -4,9 +4,7 @@ import { TYPES } from '../../constants/obstacles.js';
 class Obstacle extends Component {
 	render() {
 		let props = this.props;
-
 		let thisType = TYPES.filter(obs => {
-			console.log(props.type)
 			return obs.type === props.type;
 		})[0];
 		return(
@@ -17,6 +15,8 @@ class Obstacle extends Component {
 					width: `${ props.spriteWidth }px`,
 					left: `${ props.left }px`,
 					top: `${ props.top }px`,
+					zIndex: props.top + props.spriteHeight,
+					opacity: 0.8,
 					backgroundImage: `url(${ thisType.bgImage })`,
 					backgroundPositionX: `${ thisType.bgPosX }px`,
 					backgroundPositionY: `${ thisType.bgPosY }px`

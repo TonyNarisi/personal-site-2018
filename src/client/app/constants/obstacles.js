@@ -4,9 +4,10 @@ const TREE = {
 	type: 'tree',
 	spriteHeight: 112,
 	spriteWidth: 64,
-	height: 46,
+	height: 26,
 	width: 64,
 	bgImage: mtnLandscape,
+	hitBoxYOffset: 86,
 	bgPosX: -288,
 	bgPosY: -395 
 };

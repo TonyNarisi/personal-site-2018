@@ -29,6 +29,7 @@ export function createObstacle(key) {
 		type: CREATE_OBSTACLE,
 		spriteWidth: thisObs.spriteWidth,
 		spriteHeight: thisObs.spriteHeight,
+		hitBoxYOffset: thisObs.hitBoxYOffset,
 		width: thisObs.width,
 		height: thisObs.height,
 		spriteType: thisObs.type,
@@ -41,10 +42,6 @@ export function createObstacle(key) {
 export function makeScreenActive() {
 	return { type: MAKE_SCREEN_ACTIVE };
 }
-
-// export function moveChar(up, down, left, right) {
-// 	return { type: MOVE_CHAR, up, down, left, right };
-// }
 
 export function refreshScreen(up, down, left, right) {
 	return { type: REFRESH_SCREEN, up, down, left, right };

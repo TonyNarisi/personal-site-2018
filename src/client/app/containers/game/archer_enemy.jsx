@@ -14,6 +14,7 @@ class ArcherEnemy extends Component {
 					width: `${ ARCHER_ENEMY.WIDTH }px`,
 					top: `${ props.posY }px`,
 					left: `${ props.posX }px`,
+					zIndex: props.posY + ARCHER_ENEMY.HEIGHT,
 					backgroundImage: `url(${ walkcycle })`,
 					backgroundPositionX: `${ (props.bgMoveX * ARCHER_ENEMY.SPRITE_WIDTH) - ARCHER_ENEMY.X_OFFSET }px`,
 					backgroundPositionY: `${ (props.bgMoveY * ARCHER_ENEMY.SPRITE_HEIGHT) - ARCHER_ENEMY.Y_OFFSET }px`

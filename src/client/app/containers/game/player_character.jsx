@@ -44,6 +44,7 @@ class PlayerCharacter extends Component {
 					width: `${ PLAYER_CHAR_WIDTH }px`,
 					left: `${ props.posX }px`,
 					top: `${ props.posY }px`,
+					zIndex: props.posY + PLAYER_CHAR_HEIGHT,
 					backgroundImage: `url(${ charWalkcycle })`,
 					backgroundPositionX: `${ (props.bgMoveX * PLAYER_CHAR_SPRITE_WIDTH) - PLAYER_CHAR_X_OFFSET }px`,
 					backgroundPositionY: `${ (props.bgMoveY * PLAYER_CHAR_SPRITE_HEIGHT) - PLAYER_CHAR_Y_OFFSET }px`

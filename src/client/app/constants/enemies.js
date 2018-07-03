@@ -12,6 +12,8 @@ export const ARCHER_ENEMY = {
 		'horizontal': 8,
 		'vertical': 0
 	},
+	COLL_Y_OFFSET: 30,
+	COLL_HEIGHT: 24,
 	STARTING_HEALTH: 2,
 	DIR_LOOP_MAX: 90,
 	BG_MOVE_Y_MAP: {

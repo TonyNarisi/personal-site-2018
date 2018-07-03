@@ -16,7 +16,7 @@
 .game__player-health {
 	max-width: 40px;
 	position: relative;
-	z-index: 3;
+	z-index: 401;
 }
 .game__bg--tile {
 	position: absolute;
