@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { registerKeyDown, registerKeyUp } from '../../actions/index.js';
+import PlayerAxe from '../../components/game/player_axe.jsx';
 import {
 	ARROW_KEYCODES,
 	PLAYER_CHAR_WIDTH,
@@ -49,6 +50,7 @@ class PlayerCharacter extends Component {
 					backgroundPositionX: `${ (props.bgMoveX * PLAYER_CHAR_SPRITE_WIDTH) - PLAYER_CHAR_X_OFFSET }px`,
 					backgroundPositionY: `${ (props.bgMoveY * PLAYER_CHAR_SPRITE_HEIGHT) - PLAYER_CHAR_Y_OFFSET }px`
 				}}>
+				<PlayerAxe />
 			</div>
 		)
 	}

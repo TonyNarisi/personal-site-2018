@@ -1,0 +1,8 @@
+export const AXE = {
+	HEIGHT: 40,
+	WIDTH: 40,
+	LEFT_SPACE: 4,
+	RIGHT_SPACE: 7,
+	TOP_SPACE: 4,
+	BOTTOM_SPACE: 7
+};
