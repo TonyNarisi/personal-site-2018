@@ -4,6 +4,7 @@ import { TYPES } from '../constants/obstacles.js';
 export const MAKE_SCREEN_ACTIVE = 'MAKE_SCREEN_ACTIVE';
 export const REGISTER_KEY_DOWN = 'REGISTER_KEY_DOWN';
 export const REGISTER_KEY_UP = 'REGISTER_KEY_UP';
+export const PLAYER_ATTACK = 'PLAYER_ATTACK';
 export const CREATE_OBSTACLE = 'CREATE_OBSTACLE';
 export const SET_NEW_ENEMY_POS = 'SET_NEW_ENEMY_POS';
 export const CHANGE_ENEMY_DIR = 'CHANGE_ENEMY_DIR';
@@ -57,6 +58,10 @@ export function registerKeyUp(e) {
 	let code = e.keyCode;
 	let dir = determineDir(code);
 	return { type: REGISTER_KEY_UP, dir };
+}
+
+export function playerAttack() {
+	return { type: PLAYER_ATTACK };
 }
 
 export function setNewEnemyPos(id, posX, posY) {

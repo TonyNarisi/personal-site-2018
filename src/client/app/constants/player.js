@@ -11,6 +11,7 @@ export const PLAYER_CHAR_SPRITE_HEIGHT = 64;
 export const PLAYER_CHAR_COLL_HEIGHT = 16;
 export const PLAYER_CHAR_COLL_Y_OFFSET = 32;
 export const PLAYER_CHAR_SPRITE_WIDTH = 64;
+export const PC_MAX_ATTACK_LOOP = 20;
 export const MAX_PC_BG_MOVE_X = 8;
 export const PC_BG_MOVE_Y_MAP = {
 	'up': 0,

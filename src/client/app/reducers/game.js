@@ -9,6 +9,7 @@ import {
 	PLAYER_CHAR_WIDTH,
 	PLAYER_CHAR_INNER_HITBOX_VERT,
 	PLAYER_CHAR_INNER_HITBOX_HOR,
+	PC_MAX_ATTACK_LOOP,
 	MAX_PC_BG_MOVE_X,
 	PC_BG_MOVE_Y_MAP,
 	REV_PC_Y_MAP,
@@ -26,6 +27,7 @@ import {
 	REFRESH_SCREEN,
 	REGISTER_KEY_DOWN,
 	REGISTER_KEY_UP,
+	PLAYER_ATTACK,
 	CREATE_OBSTACLE,
 	SET_NEW_ENEMY_POS,
 	CHANGE_ENEMY_DIR
@@ -481,6 +483,8 @@ const initialState = {
 		health: 4,
 		isGettingHit: false,
 		hitLoop: 0,
+		isAttacking: false,
+		attackLoop: 0,
 		upMovement: false,
 		downMovement: false,
 		leftMovement: false,
@@ -532,6 +536,15 @@ const gameData = (state = initialState, action) => {
 					'type': action.spriteType
 				}])
 			}
+		case PLAYER_ATTACK:
+			return {
+				...state,
+				player: {
+					...state.player,
+					isAttacking: true,
+					attackLoop: state.player.attackLoop + 1
+				}
+			} 
 		case MAKE_SCREEN_ACTIVE:
 			return {
 				...state,
@@ -542,8 +555,8 @@ const gameData = (state = initialState, action) => {
 				...state,
 				player: {
 					...state.player,
-					[`${action.dir}Movement`]: true,
-					bgMoveY: PC_BG_MOVE_Y_MAP[action.dir]
+					[`${action.dir}Movement`]: !state.player.isAttacking ? true : state.player[`${action.dir}Movement`],
+					bgMoveY: !state.player.isAttacking ? PC_BG_MOVE_Y_MAP[action.dir] : state.player.bgMoveY
 				}
 			}
 		case REGISTER_KEY_UP:
@@ -551,42 +564,54 @@ const gameData = (state = initialState, action) => {
 				...state,
 				player: {
 					...state.player,
-					[`${action.dir}Movement`]: false
+					[`${action.dir}Movement`]: !state.player.isAttacking ? false : state.player[`${action.dir}Movement`]
 				}
 			}
 		case REFRESH_SCREEN:
 			let obs = state.obstacles;
 			let player = state.player;
-			if (!player.isGettingHit) {
-				var proposedCharMove = moveChar(player, action, obs);
+			if (!player.isAttacking) {
+				if (!player.isGettingHit) {
+					var proposedCharMove = moveChar(player, action, obs);
+				} else {
+					var proposedCharMove = moveCharFromCollision(player, obs);
+					proposedCharMove.hitLoop = player.hitLoop + 1;
+				}
+				if (proposedCharMove.hitLoop > 10) {
+					proposedCharMove.hitLoop = 0;
+					proposedCharMove.isGettingHit = false;
+				}
 			} else {
-				var proposedCharMove = moveCharFromCollision(player, obs);
-				proposedCharMove.hitLoop = player.hitLoop + 1;
-			}
-			if (proposedCharMove.hitLoop > 10) {
-				proposedCharMove.hitLoop = 0;
-				proposedCharMove.isGettingHit = false;
+				proposedCharMove = {
+					attackLoop: player.attackLoop + 1
+				}
+				if (proposedCharMove.attackLoop > PC_MAX_ATTACK_LOOP) {
+					proposedCharMove.attackLoop = 0;
+					proposedCharMove.isAttacking = false;
+				}
 			}
 			var proposedEnemyMoves = state.enemies.map(enemy => {
 				return moveEnemy(enemy, obs);
 			})
-			var charEnemyCollision = (player.isGettingHit ? false : detectCharEnemyColl(proposedCharMove, proposedEnemyMoves));
-			if (charEnemyCollision.didHappen) {
-				proposedCharMove.health = player.health - 1;
-				proposedCharMove.isGettingHit = true;
-				// Replace with a function that determines the direction of the actual hit and reverses it
-				proposedCharMove.hitDir = REV_PC_Y_MAP_COLL[proposedCharMove.bgMoveY];
-				proposedEnemyMoves = proposedEnemyMoves.map(enemy => {
-					return(
-						enemy.id === charEnemyCollision.enemyId ?
-								{
-									...enemy,
-									dir: OPPOSITE_DIRS[enemy.dir]
-								}
-							:
-								enemy
-					)
-				})
+			if (!player.isAttacking) {
+				var charEnemyCollision = (player.isGettingHit ? false : detectCharEnemyColl(proposedCharMove, proposedEnemyMoves));
+				if (charEnemyCollision.didHappen) {
+					proposedCharMove.health = player.health - 1;
+					proposedCharMove.isGettingHit = true;
+					// Replace with a function that determines the direction of the actual hit and reverses it
+					proposedCharMove.hitDir = REV_PC_Y_MAP_COLL[proposedCharMove.bgMoveY];
+					proposedEnemyMoves = proposedEnemyMoves.map(enemy => {
+						return(
+							enemy.id === charEnemyCollision.enemyId ?
+									{
+										...enemy,
+										dir: OPPOSITE_DIRS[enemy.dir]
+									}
+								:
+									enemy
+						)
+					})
+				}
 			}
 
 			return {
