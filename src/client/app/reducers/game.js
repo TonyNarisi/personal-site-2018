@@ -585,12 +585,12 @@ const gameData = (state = initialState, action) => {
 					proposedCharMove.hitLoop = 0;
 					proposedCharMove.isGettingHit = false;
 				}
-				if (proposedCharMove.isReturningFromAttack) {
+				if (player.isReturningFromAttack) {
 					proposedCharMove.returnAttackLoop = player.returnAttackLoop + 1;
 				}
-				if (proposedCharMove.returnAttackLoop > PC_RETURN_ATTACK) {
-					propsosedCharMove.isReturningFromAttack = false;
-					propsosedCharMove.returnAttackLoop = 0;
+				if (proposedCharMove.returnAttackLoop >= PC_RETURN_ATTACK) {
+					proposedCharMove.isReturningFromAttack = false;
+					proposedCharMove.returnAttackLoop = 0;
 				}
 			} else {
 				proposedCharMove = {
