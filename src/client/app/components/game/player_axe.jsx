@@ -5,7 +5,9 @@ import {
 	REV_PC_Y_MAP,
 	PLAYER_CHAR_INNER_HITBOX_HOR,
 	PLAYER_CHAR_WIDTH,
-	PC_MAX_ATTACK_LOOP
+	PC_MAX_ATTACK_LOOP,
+	PC_ATTACK_LOOP_SWITCH,
+	PC_RETURN_ATTACK
 } from '../../constants/player.js';
 import axe from '../../../public/assets/game/attacks/upg_axeDouble.png';
 
@@ -18,18 +20,32 @@ class PlayerAxe extends Component {
 		let props = this.props;
 		switch (dir) {
 			case 'left':
-				return Math.round(20 * props.attackLoop/PC_MAX_ATTACK_LOOP);
+				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
+					// write
+				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
+					return Math.round(-7 * props.attackLoop/PC_ATTACK_LOOP_SWITCH);
+				} else {
+					return Math.round(-7 + (27 * props.attackLoop/PC_MAX_ATTACK_LOOP));
+				}
 			default:
 				return 0;
 		}
 	}
 
 	findLeft(dir) {
+		let props = this.props;
 		switch (dir) {
 			case 'down':
 				return -(AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.LEFT_SPACE));
 			case 'left':
-				return -(AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.LEFT_SPACE) - (PLAYER_CHAR_INNER_HITBOX_HOR.horizontal/2));
+				let baseMeasure = -(AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.LEFT_SPACE) - (PLAYER_CHAR_INNER_HITBOX_HOR.horizontal/2));
+				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
+					// write
+				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
+					return Math.round(6 * props.attackLoop/PC_ATTACK_LOOP_SWITCH) + baseMeasure;
+				} else {
+					return baseMeasure;
+				}
 			case 'up':
 				return (AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.RIGHT_SPACE));
 			case 'right':
@@ -53,7 +69,13 @@ class PlayerAxe extends Component {
 		let props = this.props;
 		switch (dir) {
 			case 'left':
-				return `rotateZ(-${ Math.round(90 * (props.attackLoop/PC_MAX_ATTACK_LOOP)) }deg)`
+				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
+					// write
+				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
+					return `rotateZ(${ Math.round(45 * (props.attackLoop/PC_ATTACK_LOOP_SWITCH)) }deg)`;
+				} else {
+					return `rotateZ(${ Math.round(45 - (135 * (props.attackLoop/PC_MAX_ATTACK_LOOP))) }deg)`;
+				}
 			default:
 				return `rotateZ(${ props.attackLoop }deg)`;
 		}
@@ -91,7 +113,8 @@ class PlayerAxe extends Component {
 const mapStateToProps = (state, ownProps) => {
 	return {
 		playerBgMoveY: state.gameData.player.bgMoveY,
-		attackLoop: state.gameData.player.attackLoop
+		attackLoop: state.gameData.player.attackLoop,
+		returnAttackLoop: state.gameData.player.returnAttackLoop
 	}	
 }
 

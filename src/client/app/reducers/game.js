@@ -15,7 +15,8 @@ import {
 	REV_PC_Y_MAP,
 	REV_PC_Y_MAP_COLL,
 	PLAYER_CHAR_COLL_HEIGHT,
-	PLAYER_CHAR_COLL_Y_OFFSET
+	PLAYER_CHAR_COLL_Y_OFFSET,
+	PC_RETURN_ATTACK
 } from '../constants/player.js';
 import {
 	POTENTIAL_DIRS,
@@ -485,6 +486,8 @@ const initialState = {
 		hitLoop: 0,
 		isAttacking: false,
 		attackLoop: 0,
+		isReturningFromAttack: false,
+		returnAttackLoop: 0,
 		upMovement: false,
 		downMovement: false,
 		leftMovement: false,
@@ -577,9 +580,17 @@ const gameData = (state = initialState, action) => {
 					var proposedCharMove = moveCharFromCollision(player, obs);
 					proposedCharMove.hitLoop = player.hitLoop + 1;
 				}
+				// Define as a constant
 				if (proposedCharMove.hitLoop > 10) {
 					proposedCharMove.hitLoop = 0;
 					proposedCharMove.isGettingHit = false;
+				}
+				if (proposedCharMove.isReturningFromAttack) {
+					proposedCharMove.returnAttackLoop = player.returnAttackLoop + 1;
+				}
+				if (proposedCharMove.returnAttackLoop > PC_RETURN_ATTACK) {
+					propsosedCharMove.isReturningFromAttack = false;
+					propsosedCharMove.returnAttackLoop = 0;
 				}
 			} else {
 				proposedCharMove = {
@@ -588,6 +599,8 @@ const gameData = (state = initialState, action) => {
 				if (proposedCharMove.attackLoop > PC_MAX_ATTACK_LOOP) {
 					proposedCharMove.attackLoop = 0;
 					proposedCharMove.isAttacking = false;
+					proposedCharMove.isReturningFromAttack = true;
+					proposedCharMove.returnAttackLoop = player.returnAttackLoop + 1;
 				}
 			}
 			var proposedEnemyMoves = state.enemies.map(enemy => {
