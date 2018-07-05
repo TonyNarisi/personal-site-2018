@@ -7,7 +7,13 @@ import {
 	PLAYER_CHAR_WIDTH,
 	PC_MAX_ATTACK_LOOP,
 	PC_ATTACK_LOOP_SWITCH,
-	PC_RETURN_ATTACK
+	PC_RETURN_ATTACK,
+	END_ATTACK_TOP,
+	END_WINDUP_TOP,
+	END_ATTACK_LEFT,
+	END_WINDUP_LEFT,
+	END_ATTACK_ROTATE_Z,
+	END_WINDUP_ROTATE_Z
 } from '../../constants/player.js';
 import axe from '../../../public/assets/game/attacks/upg_axeDouble.png';
 
@@ -17,88 +23,36 @@ class PlayerAxe extends Component {
 		return REV_PC_Y_MAP[bgMoveY];
 	}
 
-	findTop(dir) {
+	findTop(dir, isReturning, isWindingUp) {
 		let props = this.props;
-		switch (dir) {
-			case 'up':
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return Math.round(-18 + (18 * props.returnAttackLoop/PC_RETURN_ATTACK));
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return Math.round(7 * props.attackLoop/PC_ATTACK_LOOP_SWITCH);
-				} else {
-					return Math.round(7 - (25 * (props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH)));
-				}
-				return 0;
-			case 'left':
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return Math.round(20 - (20 * props.returnAttackLoop/PC_RETURN_ATTACK));
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return Math.round(-7 * props.attackLoop/PC_ATTACK_LOOP_SWITCH);
-				} else {
-					return Math.round(-7 + (27 * (props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH)));
-				}
-			case 'down':
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return Math.round(26 - (26 * props.returnAttackLoop/PC_RETURN_ATTACK));
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return Math.round(-7 * props.attackLoop/PC_ATTACK_LOOP_SWITCH);
-				} else {
-					return Math.round(-7 + (33 * (props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH)));
-				}
-			case 'right':
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return Math.round(20 - (20 * props.returnAttackLoop/PC_RETURN_ATTACK));
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return Math.round(-7 * props.attackLoop/PC_ATTACK_LOOP_SWITCH);
-				} else {
-					return Math.round(-7 + (27 * (props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH)));
-				}
-			default:
-				return 0;
+		if (isReturning) {
+			return Math.round(END_ATTACK_TOP[dir] + ((-1 * END_ATTACK_TOP[dir]) * props.returnAttackLoop/PC_RETURN_ATTACK));
+		} else if (isWindingUp) {
+			return Math.round(END_WINDUP_TOP[dir] * props.attackLoop/PC_ATTACK_LOOP_SWITCH);
+		} else {
+			return Math.round(END_WINDUP_TOP[dir] + ((END_ATTACK_TOP[dir] - END_WINDUP_TOP[dir]) * (props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH)));
 		}
 	}
 
-	findLeft(dir) {
+	findLeft(dir, isReturning, isWindingUp) {
 		let props = this.props;
-		switch (dir) {
-			case 'down':
-				var baseMeasure = -(AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.LEFT_SPACE));
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return props.returnAttackLoop/PC_RETURN_ATTACK * baseMeasure;
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return baseMeasure + (4 * props.attackLoop/PC_ATTACK_LOOP_SWITCH);
-				} else {
-					return baseMeasure - (-29 * (props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH));
-				}
-			case 'left':
-				var baseMeasure = -(AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.LEFT_SPACE) - (PLAYER_CHAR_INNER_HITBOX_HOR.horizontal/2));
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return baseMeasure;
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return Math.round(6 * props.attackLoop/PC_ATTACK_LOOP_SWITCH) + baseMeasure;
-				} else {
-					return baseMeasure;
-				}
-			case 'up':
-				var baseMeasure = (AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.RIGHT_SPACE));
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return props.returnAttackLoop/PC_RETURN_ATTACK * baseMeasure;
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return baseMeasure + (4 * props.attackLoop/PC_ATTACK_LOOP_SWITCH);
-				} else {
-					return baseMeasure - (26 * (props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH));
-				}
-			case 'right':
-				var baseMeasure = (AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.RIGHT_SPACE) - PLAYER_CHAR_WIDTH + PLAYER_CHAR_INNER_HITBOX_HOR.horizontal) + 10;
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return baseMeasure;					
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return -Math.round(6 * props.attackLoop/PC_ATTACK_LOOP_SWITCH) + baseMeasure;
-				} else {
-					return baseMeasure;
-				}
-			default:
-				return 0;
+		var baseMeasure;
+		if (dir === 'up') {
+			baseMeasure = (AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.RIGHT_SPACE));
+		} else if (dir === 'down') {
+			baseMeasure = -(AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.LEFT_SPACE));
+		} else if (dir === 'left') {
+			baseMeasure = -(AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.LEFT_SPACE) - (PLAYER_CHAR_INNER_HITBOX_HOR.horizontal/2));
+		} else {
+			baseMeasure = (AXE.WIDTH - (AXE.RIGHT_SPACE + AXE.RIGHT_SPACE) - PLAYER_CHAR_WIDTH + PLAYER_CHAR_INNER_HITBOX_HOR.horizontal) + 10;
+		}
+
+		if (isReturning) {
+			return (baseMeasure + END_ATTACK_LEFT[dir]) - ((props.returnAttackLoop/PC_RETURN_ATTACK) * END_ATTACK_LEFT[dir]);
+		} else if (isWindingUp) {
+			return baseMeasure + (END_WINDUP_LEFT[dir] * props.attackLoop/PC_ATTACK_LOOP_SWITCH);
+		} else {
+			return baseMeasure + (END_ATTACK_LEFT[dir] * (props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH));
 		}
 	}
 
@@ -112,49 +66,22 @@ class PlayerAxe extends Component {
 		}
 	}
 
-	findZRotate(dir) {
+	findZRotate(dir, isReturning, isWindingUp) {
 		let props = this.props;
-		switch (dir) {
-			case 'up':
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return `rotateZ(${ Math.round(90 + (-90 * (props.returnAttackLoop/PC_RETURN_ATTACK))) }deg)`;
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return `rotateZ(${ Math.round(-45 * (props.attackLoop/PC_ATTACK_LOOP_SWITCH)) }deg)`;
-				} else {
-					return `rotateZ(${ Math.round((135 * ((props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH)))) - 45 }deg)`;
-				}
-			case 'left':
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return `rotateZ(${ Math.round(-90 + (90 * props.returnAttackLoop/PC_RETURN_ATTACK))}deg)`;
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return `rotateZ(${ Math.round(45 * (props.attackLoop/PC_ATTACK_LOOP_SWITCH)) }deg)`;
-				} else {
-					return `rotateZ(${ Math.round(45 - (135 * ((props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH)))) }deg)`;
-				}
-			case 'down':
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return `rotateZ(${ Math.round(-180 + (180 * (props.returnAttackLoop/PC_RETURN_ATTACK))) }deg)`;
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return `rotateZ(${ Math.round(45 * (props.attackLoop/PC_ATTACK_LOOP_SWITCH)) }deg)`;
-				} else {
-					return `rotateZ(${ Math.round((-225 * ((props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH)))) + 45 }deg)`;
-				}
-			case 'right':
-				if (props.attackLoop === 0 && props.returnAttackLoop != 0) {
-					return `rotateZ(-${ Math.round(90 + (-90 * props.returnAttackLoop/PC_RETURN_ATTACK)) }deg)`;
-				} else if (props.attackLoop <= PC_ATTACK_LOOP_SWITCH) {
-					return `rotateZ(${ Math.round(45 * (props.attackLoop/PC_ATTACK_LOOP_SWITCH)) }deg)`;
-				} else {
-					return `rotateZ(-${ Math.round(-45 + (135 * ((props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH)))) }deg)`;
-				}
-			default:
-				return `rotateZ(${ props.attackLoop }deg)`;
+		if (isReturning) {
+			return `rotateZ(${ Math.round(END_ATTACK_ROTATE_Z[dir] + (-END_ATTACK_ROTATE_Z[dir] * (props.returnAttackLoop/PC_RETURN_ATTACK))) }deg)`;
+		} else if (isWindingUp) {
+			return `rotateZ(${ Math.round(END_WINDUP_ROTATE_Z[dir] * (props.attackLoop/PC_ATTACK_LOOP_SWITCH)) }deg)`;
+		} else {
+			return `rotateZ(${ Math.round(((END_ATTACK_ROTATE_Z[dir] - END_WINDUP_ROTATE_Z[dir]) * ((props.attackLoop - PC_ATTACK_LOOP_SWITCH)/(PC_MAX_ATTACK_LOOP - PC_ATTACK_LOOP_SWITCH))) + END_WINDUP_ROTATE_Z[dir]) }deg)`;
 		}
 	}
 
 	render() {
 		let props = this.props;
-		let playerDir = this.findPlayerDir(props.playerBgMoveY)
+		let playerDir = this.findPlayerDir(props.playerBgMoveY);
+		let isReturning = props.attackLoop === 0 && props.returnAttackLoop != 0;
+		let isWindingUp = props.attackLoop <= PC_ATTACK_LOOP_SWITCH;
 		return(
 			<div
 				className="game__player--axe"
@@ -163,9 +90,9 @@ class PlayerAxe extends Component {
 					'width': `${ AXE.WIDTH }px`,
 					'backgroundSize': '100%',
 					'position': 'absolute',
-					'top': `${ this.findTop(playerDir) }px`,
-					'left': `${ this.findLeft(playerDir) }px`,
-					'transform': `${ this.findTransform(playerDir) } ${ this.findZRotate(playerDir) }`,
+					'top': `${ this.findTop(playerDir, isReturning, isWindingUp) }px`,
+					'left': `${ this.findLeft(playerDir, isReturning, isWindingUp) }px`,
+					'transform': `${ this.findTransform(playerDir, isReturning, isWindingUp) } ${ this.findZRotate(playerDir) }`,
 					'backgroundImage': `url(${ axe })`
 				}}>
 			</div>

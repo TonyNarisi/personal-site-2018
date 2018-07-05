@@ -25,3 +25,40 @@ export const REV_PC_Y_MAP = ['up', 'right', 'down', 'left'];
 export const REV_PC_Y_MAP_COLL = ['down', 'left', 'up', 'right'];
 export const MOVEMENT_RATE = 3;
 export const ARROW_KEYCODES = [37,38,39,40];
+export const END_ATTACK_TOP = {
+	'up': -18,
+	'down': 26,
+	'left': 20,
+	'right': 20 
+}
+export const END_WINDUP_TOP = {
+	'up': 7,
+	'down': -7,
+	'left': -7,
+	'right': -7
+}
+export const END_ATTACK_LEFT = {
+	'up': -26,
+	'down': 29,
+	'left': 0,
+	'right': 0
+
+};
+export const END_WINDUP_LEFT = {
+	'up': 4,
+	'down': -4,
+	'left': 6,
+	'right': -6
+};
+export const END_ATTACK_ROTATE_Z = {
+	'up': 90,
+	'down': -180,
+	'left': -90,
+	'right': -90
+};
+export const END_WINDUP_ROTATE_Z = {
+	'up': -45,
+	'down': 45,
+	'left': 45,
+	'right': 45
+};
