@@ -470,6 +470,10 @@ const moveEnemy = (enemy, obstacles) => {
 	}
 }
 
+const detectEnemyHit = (proposedCharMove, proposedEnemyMoves) => {
+	return false;
+}
+
 const initialState = {
 	screenActive: false,
 	obstacles: [],
@@ -571,6 +575,7 @@ const gameData = (state = initialState, action) => {
 				}
 			}
 		case REFRESH_SCREEN:
+			// Needs a major refactor once it's in a completed state
 			let obs = state.obstacles;
 			let player = state.player;
 			if (!player.isAttacking) {
@@ -625,6 +630,8 @@ const gameData = (state = initialState, action) => {
 						)
 					})
 				}
+			} else {
+				detectEnemyHit(proposedCharMove, proposedEnemyMoves);
 			}
 
 			return {
