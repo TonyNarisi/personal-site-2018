@@ -92,7 +92,7 @@ class PlayerAxe extends Component {
 					'position': 'absolute',
 					'top': `${ this.findTop(playerDir, isReturning, isWindingUp) }px`,
 					'left': `${ this.findLeft(playerDir, isReturning, isWindingUp) }px`,
-					'transform': `${ this.findTransform(playerDir, isReturning, isWindingUp) } ${ this.findZRotate(playerDir) }`,
+					'transform': `${ this.findTransform(playerDir) } ${ this.findZRotate(playerDir, isReturning, isWindingUp) }`,
 					'backgroundImage': `url(${ axe })`
 				}}>
 			</div>

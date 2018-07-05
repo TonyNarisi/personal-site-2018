@@ -558,8 +558,8 @@ const gameData = (state = initialState, action) => {
 				...state,
 				player: {
 					...state.player,
-					[`${action.dir}Movement`]: !state.player.isAttacking ? true : state.player[`${action.dir}Movement`],
-					bgMoveY: !state.player.isAttacking ? PC_BG_MOVE_Y_MAP[action.dir] : state.player.bgMoveY
+					[`${action.dir}Movement`]: true,
+					bgMoveY: PC_BG_MOVE_Y_MAP[action.dir]
 				}
 			}
 		case REGISTER_KEY_UP:
@@ -567,7 +567,7 @@ const gameData = (state = initialState, action) => {
 				...state,
 				player: {
 					...state.player,
-					[`${action.dir}Movement`]: !state.player.isAttacking ? false : state.player[`${action.dir}Movement`]
+					[`${action.dir}Movement`]: false
 				}
 			}
 		case REFRESH_SCREEN:
