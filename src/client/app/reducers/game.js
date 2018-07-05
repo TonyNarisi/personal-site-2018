@@ -16,12 +16,19 @@ import {
 	REV_PC_Y_MAP_COLL,
 	PLAYER_CHAR_COLL_HEIGHT,
 	PLAYER_CHAR_COLL_Y_OFFSET,
-	PC_RETURN_ATTACK
+	PC_RETURN_ATTACK,
+	PC_ATTACK_LOOP_SWITCH
 } from '../constants/player.js';
 import {
 	POTENTIAL_DIRS,
 	ARCHER_ENEMY
 } from '../constants/enemies.js';
+import {
+	findPlayerDir,
+	findTopAxe,
+	findLeftAxe,
+	findZRotateAxe
+} from '../helpers/attack.js';
 const enemyArr = [ARCHER_ENEMY];
 import {
 	MAKE_SCREEN_ACTIVE,
@@ -471,7 +478,46 @@ const moveEnemy = (enemy, obstacles) => {
 }
 
 const detectEnemyHit = (proposedCharMove, proposedEnemyMoves) => {
-	return false;
+	// CLEAN UP TO BE TRIANGLE BASED
+	let axeHitbox = document.getElementById('axe-hitbox').getBoundingClientRect();
+	let gameRect = document.getElementsByClassName('game__outer-wrapper')[0].getBoundingClientRect();
+	let axeTop = axeHitbox.top - gameRect.top;
+	let axeBottom = axeHitbox.bottom - gameRect.top;
+	let axeLeft = axeHitbox.left - gameRect.left;
+	let axeRight = axeHitbox.right - gameRect.left;
+	proposedEnemyMoves.map(enemy => {
+		var isInsideY, isInsideX;
+		let enemyRules = enemyArr.filter(proto => {
+			return proto.type === enemy.type;
+		})[0];
+		if (enemy.dir === 'left' || enemy.dir === 'right') {
+			var facing = 'horizontal';
+		} else {
+			var facing = 'vertical';
+		}
+		let enemyTop = enemy.posY + enemyRules.COLL_Y_OFFSET;
+		let enemyBottom = enemy.posY + enemyRules.HEIGHT;
+		let enemyLeft = enemy.posX + (enemyRules.INNER_HITBOX_HOR[facing]/2);
+		let enemyRight = enemy.posX + enemyRules.WIDTH - enemyRules.INNER_HITBOX_HOR[facing];
+
+		if ((enemyTop <= axeTop && enemyTop >= axeBottom) || (enemyBottom <= axeTop && enemyBottom >= axeBottom) || (enemyTop >= axeTop && enemyBottom <= axeBottom) || (axeTop <= enemyTop && axeBottom >= enemyBottom)) {
+			isInsideY = true;
+		} else {
+			isInsideY = false;
+		}
+
+		if ((enemyRight >= axeLeft && enemyRight <= axeRight) || (enemyLeft >= axeLeft && enemyLeft <= axeRight) || (enemyLeft >= axeLeft && enemyRight <= axeRight) || (axeLeft >= enemyLeft && axeRight <= enemyRight)) {
+			isInsideX = true;
+		} else {
+			isInsideX = false;
+		}
+
+		if (isInsideX && isInsideY) {
+			console.log('hit');
+		}
+
+	})
+
 }
 
 const initialState = {

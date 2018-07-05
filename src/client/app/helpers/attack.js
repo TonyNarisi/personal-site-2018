@@ -1,4 +1,5 @@
 import { 
+	REV_PC_Y_MAP,
 	PLAYER_CHAR_INNER_HITBOX_HOR,
 	PLAYER_CHAR_WIDTH,
 	PC_MAX_ATTACK_LOOP,
@@ -12,6 +13,10 @@ import {
 	END_WINDUP_ROTATE_Z
 } from '../constants/player.js';
 import { AXE } from '../constants/weapons.js';
+
+export const findPlayerDir = (bgMoveY) => {
+	return REV_PC_Y_MAP[bgMoveY];
+}
 
 export const findTopAxe = (dir, isReturning, isWindingUp, attackLoop, returnAttackLoop) => {
 	if (isReturning) {
