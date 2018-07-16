@@ -9,23 +9,33 @@ import {
 	PLAYER_CHAR_WIDTH,
 	PLAYER_CHAR_INNER_HITBOX_VERT,
 	PLAYER_CHAR_INNER_HITBOX_HOR,
+	PC_MAX_ATTACK_LOOP,
 	MAX_PC_BG_MOVE_X,
 	PC_BG_MOVE_Y_MAP,
 	REV_PC_Y_MAP,
 	REV_PC_Y_MAP_COLL,
 	PLAYER_CHAR_COLL_HEIGHT,
-	PLAYER_CHAR_COLL_Y_OFFSET
+	PLAYER_CHAR_COLL_Y_OFFSET,
+	PC_RETURN_ATTACK,
+	PC_ATTACK_LOOP_SWITCH
 } from '../constants/player.js';
 import {
 	POTENTIAL_DIRS,
 	ARCHER_ENEMY
 } from '../constants/enemies.js';
+import {
+	findPlayerDir,
+	findTopAxe,
+	findLeftAxe,
+	findZRotateAxe
+} from '../helpers/attack.js';
 const enemyArr = [ARCHER_ENEMY];
 import {
 	MAKE_SCREEN_ACTIVE,
 	REFRESH_SCREEN,
 	REGISTER_KEY_DOWN,
 	REGISTER_KEY_UP,
+	PLAYER_ATTACK,
 	CREATE_OBSTACLE,
 	SET_NEW_ENEMY_POS,
 	CHANGE_ENEMY_DIR
@@ -467,6 +477,49 @@ const moveEnemy = (enemy, obstacles) => {
 	}
 }
 
+const detectEnemyHit = (proposedCharMove, proposedEnemyMoves) => {
+	// CLEAN UP TO BE TRIANGLE BASED
+	let axeHitbox = document.getElementById('axe-hitbox').getBoundingClientRect();
+	let gameRect = document.getElementsByClassName('game__outer-wrapper')[0].getBoundingClientRect();
+	let axeTop = axeHitbox.top - gameRect.top;
+	let axeBottom = axeHitbox.bottom - gameRect.top;
+	let axeLeft = axeHitbox.left - gameRect.left;
+	let axeRight = axeHitbox.right - gameRect.left;
+	proposedEnemyMoves.map(enemy => {
+		var isInsideY, isInsideX;
+		let enemyRules = enemyArr.filter(proto => {
+			return proto.type === enemy.type;
+		})[0];
+		if (enemy.dir === 'left' || enemy.dir === 'right') {
+			var facing = 'horizontal';
+		} else {
+			var facing = 'vertical';
+		}
+		let enemyTop = enemy.posY + enemyRules.COLL_Y_OFFSET;
+		let enemyBottom = enemy.posY + enemyRules.HEIGHT;
+		let enemyLeft = enemy.posX + (enemyRules.INNER_HITBOX_HOR[facing]/2);
+		let enemyRight = enemy.posX + enemyRules.WIDTH - enemyRules.INNER_HITBOX_HOR[facing];
+
+		if ((enemyTop <= axeTop && enemyTop >= axeBottom) || (enemyBottom <= axeTop && enemyBottom >= axeBottom) || (enemyTop >= axeTop && enemyBottom <= axeBottom) || (axeTop <= enemyTop && axeBottom >= enemyBottom)) {
+			isInsideY = true;
+		} else {
+			isInsideY = false;
+		}
+
+		if ((enemyRight >= axeLeft && enemyRight <= axeRight) || (enemyLeft >= axeLeft && enemyLeft <= axeRight) || (enemyLeft >= axeLeft && enemyRight <= axeRight) || (axeLeft >= enemyLeft && axeRight <= enemyRight)) {
+			isInsideX = true;
+		} else {
+			isInsideX = false;
+		}
+
+		if (isInsideX && isInsideY) {
+			console.log('hit');
+		}
+
+	})
+
+}
+
 const initialState = {
 	screenActive: false,
 	obstacles: [],
@@ -481,6 +534,10 @@ const initialState = {
 		health: 4,
 		isGettingHit: false,
 		hitLoop: 0,
+		isAttacking: false,
+		attackLoop: 0,
+		isReturningFromAttack: false,
+		returnAttackLoop: 0,
 		upMovement: false,
 		downMovement: false,
 		leftMovement: false,
@@ -498,7 +555,9 @@ const initialState = {
 			health: 2,
 			bgMoveX: 0,
 			bgMoveY: 0,
-			animLoop: 0
+			animLoop: 0,
+			isGettingHit: false,
+			hitLoop: 0
 		},
 		{
 			type: 'archer',
@@ -510,7 +569,9 @@ const initialState = {
 			health: 2,
 			bgMoveX: 0,
 			bgMoveY: 0,
-			animLoop: 0
+			animLoop: 0,
+			isGettingHit: false,
+			hitLoop: 0
 		}
 	]
 };
@@ -532,6 +593,15 @@ const gameData = (state = initialState, action) => {
 					'type': action.spriteType
 				}])
 			}
+		case PLAYER_ATTACK:
+			return {
+				...state,
+				player: {
+					...state.player,
+					isAttacking: true,
+					attackLoop: state.player.attackLoop + 1
+				}
+			} 
 		case MAKE_SCREEN_ACTIVE:
 			return {
 				...state,
@@ -555,38 +625,63 @@ const gameData = (state = initialState, action) => {
 				}
 			}
 		case REFRESH_SCREEN:
+			// Needs a major refactor once it's in a completed state
 			let obs = state.obstacles;
 			let player = state.player;
-			if (!player.isGettingHit) {
-				var proposedCharMove = moveChar(player, action, obs);
+			if (!player.isAttacking) {
+				if (!player.isGettingHit) {
+					var proposedCharMove = moveChar(player, action, obs);
+				} else {
+					var proposedCharMove = moveCharFromCollision(player, obs);
+					proposedCharMove.hitLoop = player.hitLoop + 1;
+				}
+				// Define as a constant
+				if (proposedCharMove.hitLoop > 10) {
+					proposedCharMove.hitLoop = 0;
+					proposedCharMove.isGettingHit = false;
+				}
+				if (player.isReturningFromAttack) {
+					proposedCharMove.returnAttackLoop = player.returnAttackLoop + 1;
+				}
+				if (proposedCharMove.returnAttackLoop >= PC_RETURN_ATTACK) {
+					proposedCharMove.isReturningFromAttack = false;
+					proposedCharMove.returnAttackLoop = 0;
+				}
 			} else {
-				var proposedCharMove = moveCharFromCollision(player, obs);
-				proposedCharMove.hitLoop = player.hitLoop + 1;
-			}
-			if (proposedCharMove.hitLoop > 10) {
-				proposedCharMove.hitLoop = 0;
-				proposedCharMove.isGettingHit = false;
+				proposedCharMove = {
+					attackLoop: player.attackLoop + 1
+				}
+				if (proposedCharMove.attackLoop > PC_MAX_ATTACK_LOOP) {
+					proposedCharMove.attackLoop = 0;
+					proposedCharMove.isAttacking = false;
+					proposedCharMove.isReturningFromAttack = true;
+					proposedCharMove.returnAttackLoop = player.returnAttackLoop + 1;
+				}
 			}
 			var proposedEnemyMoves = state.enemies.map(enemy => {
 				return moveEnemy(enemy, obs);
 			})
-			var charEnemyCollision = (player.isGettingHit ? false : detectCharEnemyColl(proposedCharMove, proposedEnemyMoves));
-			if (charEnemyCollision.didHappen) {
-				proposedCharMove.health = player.health - 1;
-				proposedCharMove.isGettingHit = true;
-				// Replace with a function that determines the direction of the actual hit and reverses it
-				proposedCharMove.hitDir = REV_PC_Y_MAP_COLL[proposedCharMove.bgMoveY];
-				proposedEnemyMoves = proposedEnemyMoves.map(enemy => {
-					return(
-						enemy.id === charEnemyCollision.enemyId ?
-								{
-									...enemy,
-									dir: OPPOSITE_DIRS[enemy.dir]
-								}
-							:
-								enemy
-					)
-				})
+			if (!player.isAttacking) {
+				var charEnemyCollision = (player.isGettingHit ? false : detectCharEnemyColl(proposedCharMove, proposedEnemyMoves));
+				if (charEnemyCollision.didHappen) {
+					proposedCharMove.health = player.health - 1;
+					proposedCharMove.isGettingHit = true;
+					// Replace with a function that determines the direction of the actual hit and reverses it
+					proposedCharMove.hitDir = REV_PC_Y_MAP_COLL[proposedCharMove.bgMoveY];
+					proposedEnemyMoves = proposedEnemyMoves.map(enemy => {
+						return(
+							enemy.id === charEnemyCollision.enemyId ?
+									{
+										...enemy,
+										dir: OPPOSITE_DIRS[enemy.dir]
+									}
+								:
+									enemy
+						)
+					})
+				}
+			} else {
+				detectEnemyHit(proposedCharMove, proposedEnemyMoves);
 			}
 
 			return {

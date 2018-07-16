@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { registerKeyDown, registerKeyUp } from '../../actions/index.js';
+import { registerKeyDown, registerKeyUp, playerAttack } from '../../actions/index.js';
+import PlayerAxe from '../../components/game/player_axe.jsx';
 import {
 	ARROW_KEYCODES,
 	PLAYER_CHAR_WIDTH,
@@ -17,7 +18,10 @@ class PlayerCharacter extends Component {
 		document.addEventListener('keydown', (e) => {
 			let props = this.props;
 			if (props.screenActive && this.isArrow(e.keyCode)) {
-				props.registerKeyDown(e);
+				props.registerKeyDown(e, props.isAttacking, props.dir);
+			}
+			if (props.screenActive && e.keyCode === 32 && !props.isAttacking) {
+				props.playerAttack();
 			}
 		})
 
@@ -49,6 +53,7 @@ class PlayerCharacter extends Component {
 					backgroundPositionX: `${ (props.bgMoveX * PLAYER_CHAR_SPRITE_WIDTH) - PLAYER_CHAR_X_OFFSET }px`,
 					backgroundPositionY: `${ (props.bgMoveY * PLAYER_CHAR_SPRITE_HEIGHT) - PLAYER_CHAR_Y_OFFSET }px`
 				}}>
+				<PlayerAxe />
 			</div>
 		)
 	}
@@ -62,17 +67,21 @@ const mapStateToProps = (state, ownProps) => {
 		posY: state.gameData.player.posY,
 		bgMoveX: state.gameData.player.bgMoveX,
 		bgMoveY: state.gameData.player.bgMoveY,
-		health: state.gameData.player.health
+		health: state.gameData.player.health,
+		isAttacking: state.gameData.player.isAttacking
 	}
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
 	return {
-		registerKeyDown: (e) => {
-			dispatch(registerKeyDown(e));
+		registerKeyDown: (e, isAttacking, oldDir) => {
+			dispatch(registerKeyDown(e, isAttacking, oldDir));
 		},
 		registerKeyUp: (e) => {
 			dispatch(registerKeyUp(e));
+		},
+		playerAttack: () => {
+			dispatch(playerAttack());
 		}
 	}
 }

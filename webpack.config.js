@@ -7,7 +7,7 @@ const APP_DIR = path.resolve(__dirname, 'src/client/app');
 if (process.env.NODE_ENV) {
 	var pluginArr = [
 		new webpack.definePlugin({
-			'process.env.NODE_EN': JSON.stringify(process.env.NODE_ENV)
+			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 		}),
 		new webpack.optimize.UglifyJsPlugin({
 			comments: false,
