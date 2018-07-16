@@ -1,6 +1,7 @@
+import './styles/main.scss';
 import React from 'react';
 import { render } from 'react-dom';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import appState from './reducers/index.js';
@@ -18,7 +19,10 @@ if (process.env.NODE_ENV != 'production') {
 render(
 	<Provider store={ store }>
 		<BrowserRouter>
-			<Game />
+			<div>
+				<Route path="/" component={ Home } />
+				<Route path="/game" component={ Game } />
+			</div>
 		</BrowserRouter>
 	</Provider>,
 	document.getElementById('react-target')

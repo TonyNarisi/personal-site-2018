@@ -1,0 +1,54 @@
+// Elements
+html, body {
+  font-family: 'Lato', sans-serif;
+  color: #333;
+}
+body {
+  padding-bottom: 3.75rem;
+  overflow-x: hidden;
+}
+* {
+  box-sizing: border-box;
+}
+h1 {
+  font-size: 3em;
+}
+h3 {
+  font-size: 1.75em;
+}
+.centered-cover-bg {
+	background-size: cover;
+	background-position: 50% 50%;
+}
+
+// Home page
+.home__hero {
+	padding-top: 10rem;
+	padding-bottom: 10rem;
+	@include displayFlex()
+	@include justifyContent(center)
+	@include alignItems(center)
+	.home__hero--text-wrap {
+		display: table;
+		margin-left: auto;
+		margin-right: auto;
+		text-align: center;
+		h1, h3 {
+			color: #fff;
+			font-weight: 400;
+		}
+		h1 {
+			margin-bottom: 1rem;
+		}
+		h3 {
+			margin-top: 1rem;
+		}
+		.home__hero--separator {
+			width: 55%;
+			height: 2px;
+			background-color: #fff;
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+}

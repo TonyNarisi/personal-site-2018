@@ -44,6 +44,11 @@ const config = {
 				loader: 'babel-loader'
 			},
 			{
+				test: /.scss$/,
+				include: APP_DIR,
+				loader: 'style-loader!css-loader!sass-loader'
+			},
+			{
 				test: /\.(png|jpg|gif)$/,
 				loader: 'file-loader'
 			}
