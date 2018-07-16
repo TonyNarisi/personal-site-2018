@@ -555,7 +555,9 @@ const initialState = {
 			health: 2,
 			bgMoveX: 0,
 			bgMoveY: 0,
-			animLoop: 0
+			animLoop: 0,
+			isGettingHit: false,
+			hitLoop: 0
 		},
 		{
 			type: 'archer',
@@ -567,7 +569,9 @@ const initialState = {
 			health: 2,
 			bgMoveX: 0,
 			bgMoveY: 0,
-			animLoop: 0
+			animLoop: 0,
+			isGettingHit: false,
+			hitLoop: 0
 		}
 	]
 };
