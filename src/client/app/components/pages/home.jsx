@@ -22,7 +22,11 @@ export default class Home extends Component {
 					</div>
 				</div>
 				<WritingText 
-					message='Welcome to my website. Please look around and feel free to check out the source code at https://www.github.com'
+					message={ [
+						{ text: 'Welcome to my website.', indent: 0 },
+						{ text: 'Please look around and check out the source code', indent: 1 },
+						{ text: 'at https://www.github.com/tonynarisi', indent: 1}
+					] }
 					textId='text-target' />
 			</div>
 		)

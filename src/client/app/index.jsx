@@ -2,12 +2,11 @@ import './styles/main.scss';
 import 'babel-polyfill';
 import React from 'react';
 import { render } from 'react-dom';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import appState from './reducers/index.js';
-import Home from './components/pages/home.jsx';
-import Game from './components/pages/game.jsx';
+import App from './components/global/App';
 
 export const store = createStore(
 	appState
@@ -20,10 +19,7 @@ if (process.env.NODE_ENV != 'production') {
 render(
 	<Provider store={ store }>
 		<BrowserRouter>
-			<div>
-				<Route path="/" component={ Home } />
-				<Route path="/game" component={ Game } />
-			</div>
+			<App />
 		</BrowserRouter>
 	</Provider>,
 	document.getElementById('react-target')

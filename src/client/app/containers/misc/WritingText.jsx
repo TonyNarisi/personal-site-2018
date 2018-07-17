@@ -14,7 +14,11 @@ class WritingText extends Component {
 			<div className="row-wrapper">
 				<div className="row max-width narrow-column standard-row-padding">
 					<div className="col12">
-						<div className="writing-text__canvas">
+						<div
+							className="writing-text__canvas"
+							style={{
+								'minHeight': `${ props.message.length + 8 }em`
+							}}>
 							<p>
 								<span id={ props.textId }></span>
 								<span className="blinking-cursor"></span>

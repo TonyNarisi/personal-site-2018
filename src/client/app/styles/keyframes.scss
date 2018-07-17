@@ -1,0 +1,20 @@
+@keyframes cursor-blink {
+	0% {
+		opacity: 0;
+	}
+	25% {
+		opacity: 0.5;
+	}
+	40% {
+		opacity: 1;
+	}
+	60% {
+		opacity: 1;
+	}
+	75% {
+		opacity: 0.67;
+	}
+	100% {
+		opacity: 0;
+	}
+}
