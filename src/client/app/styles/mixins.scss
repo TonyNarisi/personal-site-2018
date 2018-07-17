@@ -1,0 +1,90 @@
+@mixin displayFlex() {
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+}
+
+@mixin displayInlineFlex() {
+  display: -ms-inline-flexbox;
+  display: -webkit-inline-flex;
+  display: inline-flex;
+}
+
+@mixin flexWrap() {
+  -ms-flex-wrap: wrap;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+@mixin flexVals($val) {
+  -ms-flex: $val;
+  -webkit-flex: $val;
+  -moz-box-flex: $val;
+  flex: $val;
+}
+
+@mixin flexDirection($val) {
+  -ms-flex-direction: $val;
+  -webkit-flex-direction: $val;
+  flex-direction: $val;
+}
+
+@mixin flexOrder($val) {
+  -ms-flex-order: $val;
+  -webkit-order: $val;
+  order: $val;
+}
+
+@mixin justifyContent($val) {
+  @if ($val == 'space-between') {
+    -ms-flex-pack: justify;
+  } @else if ($val == 'center') {
+    -ms-flex-pack: center;
+  }
+  -ms-justify-content: $val;
+  -moz-justify-content: $val;
+  -webkit-justify-content: $val;
+  justify-content: $val;
+}
+
+@mixin alignItems($val) {
+  @if ($val == 'flex-start') {
+    -ms-flex-align: start;
+  } @else if ($val == 'flex-end') {
+    -ms-flex-align: end;
+  } @else {
+    -ms-flex-align: $val;
+  }
+  -ms-align-items: $val;
+  -moz-align-items: $val;
+  -webkit-align-items: $val;
+  align-items: $val;
+}
+
+@mixin alignSelf($val) {
+  @if ($val == 'flex-start') {
+    -ms-flex-item-align: start;
+  } @else if ($val == 'flex-end') {
+    -ms-flex-item-align: end;
+  } @else {
+    -ms-flex-item-align: $val;
+  }
+  -webkit-align-self: $val;
+  align-self: $val;
+}
+
+@mixin transform($val) {
+  -o-transform: $val;
+  -ms-transform: $val;
+  -moz-transform: $val;
+  -webkit-transform: $val;
+  transform: $val;
+}
+
+@mixin transition($val) {
+  -o-transition: $val;
+  -moz-transition: $val;
+  -webkit-transition: $val;
+  transition: $val;
+}

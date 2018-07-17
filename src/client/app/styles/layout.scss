@@ -1,0 +1,77 @@
+// Layout
+.row-wrapper {
+  // With grid system, avoid needing to use clearfix to clear floated column elements
+  .row {
+    width: 100%;
+    @include displayFlex()
+    &.max-width {
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+    }
+    &.narrow-column {
+      max-width: 800px;
+    }
+    &.standard-row-padding,
+    &.standard-row-top-padding {
+      padding-top: 2.5rem;
+    }
+    &.standard-row-padding,
+    &.standard-row-bottom-padding {
+      padding-bottom: 2.5rem;
+    }
+    &.small-row-padding,
+    &.small-row-top-padding {
+      padding-top: 1.25rem;
+    }
+    &.small-row-padding,
+    &.small-row-bottom-padding {
+      padding-bottom: 1.25rem;
+    }
+  }
+  [class^="col"] {
+    display: inline-block;
+    margin-left: 4%;
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+  .col1 {
+    width: 4.66666666667%;
+  }
+  .col2 {
+    width: 13.3333333333%;
+  }
+  .col3 {
+    width: 22%;
+  }
+  .col4 {
+    width: 30.6666666667%;
+  }
+  .col5 {
+    width: 39.3333333333%;
+  }
+  .col6 {
+    width: 48%;
+  }
+  .col7 {
+    width: 56.6666666667%;
+  }
+  .col8 {
+    width: 65.3333333333%;
+  }
+  .col9 {
+    width: 74.0%;
+  }
+  .col10 {
+    width: 82.6666666667%;
+  }
+  .col11 {
+    width: 91.3333333333%;
+  }
+  .col12 {
+    width: 100%;
+  }
+}

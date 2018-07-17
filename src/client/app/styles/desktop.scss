@@ -1,0 +1,156 @@
+// Elements
+html, body {
+  font-family: 'Lato', sans-serif;
+  color: #333;
+}
+body {
+  overflow-x: hidden;
+}
+* {
+  box-sizing: border-box;
+}
+h1 {
+  font-size: 3em;
+}
+h3 {
+  font-size: 1.75em;
+}
+.center-self {
+	margin-left: auto;
+	margin-right: auto;
+}
+.text-center {
+	text-align: center;
+}
+.small-text {
+	font-size: 0.875rem;
+}
+.white-text {
+	p, h1, h2, h3, h4, h5, h6, a {
+		color: #fff;
+	}
+}
+.no-top-margin {
+	margin-top: 0;
+}
+.no-bottom-margin {
+	margin-bottom: 0;
+}
+.centered-cover-bg {
+	background-size: cover;
+	background-position: 50% 50%;
+}
+a.underline-transition {
+	text-decoration: none;
+	position: relative;
+	&:after {
+		content: '';
+		position: absolute;
+		height: 2px;
+		bottom: -3px;
+		left: 0;
+		width: 0;
+		background-color: #fff;
+		@include transition(width 0.4s ease)
+	}
+	&:hover:after {
+		width: 100%;
+	}
+}
+
+// Header
+.header-wrapper {
+	position: fixed;
+	width: 100%;
+	background-color: rgba(0,0,0,0.5);
+	.nav-list {
+		padding-left: 0;
+		margin-top: 0;
+		margin-bottom: 0;
+		text-align: right;
+		list-style-type: none;
+		li {
+			display: inline-block;
+			margin-left: 15px;
+			&:first-child {
+				margin-left: 0;
+			}
+			a {
+				color: #fff;
+			}
+		}
+	}
+}
+
+// Footer
+.footer-wrapper {
+	background-color: #05386b;
+	.footer-menu {
+		padding-left: 0;
+		margin-top: 0;
+		margin-bottom: 0;
+		list-style-type: none;
+		text-align: right;
+		li {
+			display: inline-block;
+			margin-left: 15px;
+			&:first-child {
+				margin-left: 0;
+			}
+			a {
+				color: #fff;
+			}
+		}
+	}
+}
+
+// Home page
+.home__hero {
+	padding-top: 10rem;
+	padding-bottom: 10rem;
+	@include displayFlex()
+	@include justifyContent(center)
+	@include alignItems(center)
+	.home__hero--text-wrap {
+		display: table;
+		margin-left: auto;
+		margin-right: auto;
+		text-align: center;
+		h1, h3 {
+			color: #fff;
+			font-weight: 400;
+		}
+		h1 {
+			margin-bottom: 1rem;
+		}
+		h3 {
+			margin-top: 1rem;
+		}
+		.home__hero--separator {
+			width: 55%;
+			height: 2px;
+			background-color: #fff;
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+}
+
+// Writing Text Module
+.writing-text__canvas {
+	padding: 2.5rem 1.25rem;
+	background-color: #2b2d2a;
+	p {
+		color: #fff;
+		font-family: 'Ubuntu Mono', monospace;
+		.blinking-cursor {
+			height: 1em;
+			margin-bottom: -2px;
+			margin-left: 2px;
+			width: 4px;
+			display: inline-block;
+			background-color: #fff;
+			animation: cursor-blink 0.9s infinite;
+		}
+	}
+}
